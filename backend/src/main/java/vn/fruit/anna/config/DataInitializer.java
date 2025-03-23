@@ -2,12 +2,15 @@ package vn.fruit.anna.config;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import vn.fruit.anna.enums.RoleName;
 import vn.fruit.anna.enums.Unit;
 import vn.fruit.anna.model.*;
 import vn.fruit.anna.repository.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -17,13 +20,41 @@ public class DataInitializer {
     private final CategoryRepository categoryRepository;
     private final BannerRepository bannerRepository;
     private final BlogRepository blogRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
     public void initData() {
+        initAdminAccount();
         initCategories();
         initProducts();
         initBanners();
         initBlogs();
+    }
+
+    public void initAdminAccount() {
+        // Ensure ADMIN role exists
+        Role adminRole = roleRepository.findByName(RoleName.ADMIN)
+                .orElseGet(() -> roleRepository.save(Role.builder().name(RoleName.ADMIN).build()));
+
+        // Create admin user if not exists
+        Optional<User> adminUserOpt = userRepository.findByUsername("adminadmin");
+
+        if (adminUserOpt.isEmpty()) {
+            User adminUser = User.builder()
+                    .fullName("Admin User")
+                    .email("adminadmin@gmail.com")
+                    .username("adminadmin")
+                    .password(passwordEncoder.encode("adminadmin"))
+                    .role(adminRole)
+                    .build();
+
+            userRepository.save(adminUser);
+            System.out.println("✅ Admin user created.");
+        } else {
+            System.out.println("ℹ️ Admin user already exists.");
+        }
     }
 
     private void initCategories() {

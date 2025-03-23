@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import api from "@/lib/axios-custom"
+import axios from "@/lib/axios-custom"
 import type { Product, Category, Banner, Blog } from "@/types"
 
 interface ProductStoreState {
@@ -37,7 +37,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   fetchNewProducts: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.get("/api/product/all")
+      const response = await axios.get("/api/product/all")
       set({ newProducts: response.data.result, isLoading: false })
     } catch (error) {
       console.error("Error fetching new products:", error)
@@ -51,7 +51,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   fetchBestSellingProducts: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.get("/products/best-selling")
+      const response = await axios.get("/products/best-selling")
       set({ bestSellingProducts: response.data, isLoading: false })
     } catch (error) {
       console.error("Error fetching best selling products:", error)
@@ -65,7 +65,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   fetchCategories: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.get("/api/category/all")
+      const response = await axios.get("/api/category/all")
       set({ categories: response.data.result, isLoading: false })
     } catch (error) {
       console.error("Error fetching categories:", error)
@@ -79,7 +79,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   fetchBanners: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.get("/api/banner/all")
+      const response = await axios.get("/api/banner/all")
       set({ banners: response.data.result, isLoading: false })
     } catch (error) {
       console.error("Error fetching banners:", error)
@@ -93,7 +93,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   fetchBlogs: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.get("/api/blog/all")
+      const response = await axios.get("/api/blog/all")
       set({ blogs: response.data.result, isLoading: false })
     } catch (error) {
       console.error("Error fetching blogs:", error)

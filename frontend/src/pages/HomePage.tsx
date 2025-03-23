@@ -1,9 +1,7 @@
-import Navbar from "@/components/layout/navbar"
 import Hero from "@/components/home/hero"
 import CategoryCarousel from "@/components/home/category-carousel"
 import ProductCarousel from "@/components/home/product-carousel"
 import BlogCarousel from "@/components/home/blog-carousel"
-import Footer from "@/components/layout/footer"
 import { useEffect } from "react"
 import useProductStore from "@/stores/useProductStore"
 import ProductList from "@/components/home/product-list"
@@ -35,9 +33,8 @@ export default function HomePage() {
   console.log(categories)
 
   return (
-    <main className="min-h-screen bg-white">
-      <Navbar />
-      <Hero />
+    <>
+      <Hero items={banners}/>
 
       <div className="container mx-auto space-y-16 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
 
@@ -55,9 +52,7 @@ export default function HomePage() {
 
         <LearnMore/>
       </div>
-
-      <Footer />
-    </main>
+    </>
   )
 }
 

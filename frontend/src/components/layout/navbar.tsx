@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Run only on the homepage
   useEffect(() => {
@@ -20,6 +21,11 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [location.pathname]);
+
+  const handleUserIconClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+    e.stopPropagation();
+    navigate(`/login`);
+};
 
 //   const scrollToCategory = () => {
 //     const categorySection = document.getElementById("categories");
@@ -73,13 +79,18 @@ export default function Navbar() {
           
           {/* Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="hover:cursor-pointer">
               <Search className="h-5 w-5 text-gray-700" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5 text-gray-700" />
+            <Button
+             variant="ghost"
+             size="icon" 
+             className="hover:cursor-pointer" 
+             onClick={(e) => handleUserIconClick(e)
+             }>
+              <User className="h-5 w-5 text-gray-700"/>
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="hover:cursor-pointer">
               <ShoppingCart className="h-5 w-5 text-gray-700" />
             </Button>
             

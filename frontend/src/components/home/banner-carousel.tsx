@@ -75,10 +75,10 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
 
   return (
     <>
-      <div className="relative w-fit mb-6">
+      {/* <div className="relative w-fit mb-6">
         <h2 className="text-2xl font-bold">Khuyến Mãi</h2>
         <div className="absolute left-0 -bottom-1 h-[1.5px] w-full bg-gradient-to-r from-gray-500 via-gray-300 to-transparent"></div>
-      </div>
+      </div> */}
       <div className="relative select-none">
         <Carousel
           className="w-full"
