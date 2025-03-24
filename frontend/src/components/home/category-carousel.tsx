@@ -94,7 +94,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
               <CarouselItem key={item.id} className="w-full">
                 <Card className="border-0 shadow-none">
                   <CardContent className="p-0">
-                    <div className="relative h-64 md:h-100 w-full bg-pink-200 rounded-2xl overflow-hidden">
+                    <div className="relative h-64 md:h-111 w-full bg-pink-200 rounded-2xl overflow-hidden">
                       <img
                         src={
                           item.thumbnailImage
@@ -104,7 +104,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
                         alt={item.name}
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 flex flex-col justify-center p-8">
+                      {/* <div className="absolute inset-0 flex flex-col justify-center p-8">
                         <div className="max-w-md">
                           <h3 className="text-2xl md:text-3xl font-bold text-blue-500 mb-2">{item.name}</h3>
                           <div className="flex items-center mb-4">
@@ -112,7 +112,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
                             <span className="text-4xl font-bold text-red-500">{item.name}</span>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </CardContent>
                 </Card>

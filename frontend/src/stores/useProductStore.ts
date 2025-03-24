@@ -9,14 +9,14 @@ interface ProductStoreState {
 
   // Data
   newProducts: Product[]
-  bestSellingProducts: Product[]
+  random12Products: Product[]
   categories: Category[]
   banners: Banner[]
   blogs: Blog[]
 
   // Actions
   fetchNewProducts: () => Promise<void>
-  fetchBestSellingProducts: () => Promise<void>
+  fetchRandom12Products: () => Promise<void>
   fetchCategories: () => Promise<void>
   fetchBanners: () => Promise<void>
   fetchBlogs: () => Promise<void>
@@ -28,7 +28,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   error: null,
 
   newProducts: [],
-  bestSellingProducts: [],
+  random12Products: [],
   categories: [],
   banners: [],
   blogs: [],
@@ -37,7 +37,7 @@ const useProductStore = create<ProductStoreState>((set) => ({
   fetchNewProducts: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await axios.get("/api/product/all")
+      const response = await axios.get("/api/product/newest-8")
       set({ newProducts: response.data.result, isLoading: false })
     } catch (error) {
       console.error("Error fetching new products:", error)
@@ -48,16 +48,16 @@ const useProductStore = create<ProductStoreState>((set) => ({
     }
   },
 
-  fetchBestSellingProducts: async () => {
+  fetchRandom12Products: async () => {
     try {
       set({ isLoading: true, error: null })
-      const response = await axios.get("/products/best-selling")
-      set({ bestSellingProducts: response.data, isLoading: false })
+      const response = await axios.get("/api/product/random-12")
+      set({ random12Products: response.data.result, isLoading: false })
     } catch (error) {
-      console.error("Error fetching best selling products:", error)
+      console.error("Error fetching random products:", error)
       set({
         isLoading: false,
-        error: "Failed to fetch best selling products. Please try again.",
+        error: "Failed to fetch random products. Please try again.",
       })
     }
   },

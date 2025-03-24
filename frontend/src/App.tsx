@@ -15,7 +15,7 @@ function App() {
 
   useEffect(() => {
     fetchAuthUser();
-  }, []);
+  }, [fetchAuthUser]);
 
   useEffect(() => {
     // Simulate a loading delay

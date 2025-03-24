@@ -26,8 +26,24 @@ public class ProductController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllProduct() {
         return ResponseEntity.ok(
-                new ApiResponse<>(201,
+                new ApiResponse<>(200,
                         "Get all product success",
                         productService.getAllProduct()));
+    }
+
+    @GetMapping("/random-12")
+    public ResponseEntity<?> getRandom12Products() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(200,
+                        "Get random 12 products success",
+                        productService.getRandom12Products()));
+    }
+
+    @GetMapping("/newest-8")
+    public ResponseEntity<?> get8NewestProducts() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(200,
+                        "Get 8 newest products success",
+                        productService.get8NewestProducts()));
     }
 }

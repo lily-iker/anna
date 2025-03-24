@@ -8,16 +8,18 @@ import ProductList from "@/components/home/product-list"
 import BannerCarousel from "@/components/home/banner-carousel"
 import LearnMore from "@/components/home/learn-more"
 import { SectionDivider } from "@/components/ui/section-devider"
-import { Heart, MessageCircle, Phone } from "lucide-react"
+import Feature from "@/components/home/feature"
 
 export default function HomePage() {
 
   const { 
     newProducts, 
+    random12Products, 
     categories, 
     banners, 
     blogs, 
     fetchNewProducts, 
+    fetchRandom12Products, 
     fetchCategories, 
     fetchBanners, 
     fetchBlogs 
@@ -26,13 +28,11 @@ export default function HomePage() {
   useEffect(() => {
     // Fetch data when component mounts
     fetchNewProducts()
+    fetchRandom12Products()
     fetchCategories()
     fetchBanners()
     fetchBlogs()
-  }, [fetchNewProducts, fetchCategories, fetchBanners, fetchBlogs])
-
-  console.log(newProducts)
-  console.log(categories)
+  }, [fetchNewProducts, fetchRandom12Products, fetchCategories, fetchBanners, fetchBlogs])
 
   return (
     <>
@@ -48,27 +48,13 @@ export default function HomePage() {
         {/* </div> */}
         <SectionDivider />
 
-        <ProductList title="Sản phẩm" products={newProducts} />
+        <ProductList title="Sản phẩm" products={random12Products} />
         <SectionDivider />
 
         <BannerCarousel items={banners}/>
         <SectionDivider />
 
-        <div className="flex justify-center space-x-16 text-center py-4">
-  <div className="flex flex-col items-center">
-    <MessageCircle className="h-8 w-8 text-green-600 mb-2" />
-    <span className="text-base text-gray-700 font-medium">Miễn phí vận chuyển</span>
-  </div>
-  <div className="flex flex-col items-center">
-    <Phone className="h-8 w-8 text-green-600 mb-2" />
-    <span className="text-base text-gray-700 font-medium">Đội ngũ hỗ trợ nhiệt tình</span>
-  </div>
-  <div className="flex flex-col items-center">
-    <Heart className="h-8 w-8 text-green-600 mb-2" />
-    <span className="text-base text-gray-700 font-medium">Ưu đãi đặc biệt</span>
-  </div>
-</div>
-          
+        <Feature/>
         <SectionDivider />
 
         <BlogCarousel items={blogs} />

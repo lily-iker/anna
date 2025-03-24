@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom"
-import { MessageCircle, Phone, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Footer() {
@@ -13,7 +12,7 @@ export default function Footer() {
             <p className="text-sm text-gray-600 mb-4">
               Nhấn "Nhận" để được biết thêm những thông tin mới nhất về sản phẩm, chương trình giảm giá của chúng tôi!
             </p>
-            <Button variant="outline" className="rounded-full px-6">
+            <Button variant="outline" className="rounded-full px-6 hover:cursor-pointer hover:bg-[#9DE25C]">
               Nhận
             </Button>
           </div>
@@ -82,23 +81,8 @@ export default function Footer() {
 
         {/* Bottom navigation */}
         <div className="border-t border-gray-200 pt-6">
-          {/* <div className="flex justify-center space-x-12 text-center">
-            <div className="flex flex-col items-center">
-              <MessageCircle className="h-6 w-6 text-green-600 mb-1" />
-              <span className="text-xs text-gray-600">Miễn phí vận chuyển</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Phone className="h-6 w-6 text-green-600 mb-1" />
-              <span className="text-xs text-gray-600">Đội ngũ hỗ trợ nhiệt tình</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Heart className="h-6 w-6 text-green-600 mb-1" />
-              <span className="text-xs text-gray-600">Ưu đãi đặc biệt</span>
-            </div>
-          </div> */}
-
           <div className="text-center mt-6 text-xs text-gray-500">
-            © {new Date().getFullYear()} Anna Fruit Import. All rights reserved.
+            © {new Date().getFullYear()} Anna Fruit. All rights reserved.
           </div>
         </div>
       </div>

@@ -62,11 +62,11 @@ const LoginPage = () => {
             </div>
     
             {/* Right: Illustration */}
-            <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-100 p-8">
+            <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-100">
               <img
-                src="/images/login-illustration.png"
+                src="https://res.cloudinary.com/dschfkj54/image/upload/v1742752112/banner_blog1_a48mor.jpg"
                 alt="Login Illustration"
-                className="w-full max-w-md"
+                className="w-fit h-fit"
               />
             </div>
           </div>

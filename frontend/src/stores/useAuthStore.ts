@@ -45,9 +45,9 @@ type AuthState = {
         await axios.post("/api/auth/login", { username, password })
         await useAuthStore.getState().fetchAuthUser()
         toast.success("Logged in successfully")
-      } catch (error: any) {
-        toast.error(error.response?.result?.message || "Wrong username or passsword. Please try again")
-        throw error
+      } catch (error: unknown) {
+        console.log(error)
+        toast.error("Wrong username or passsword. Please try again")
       } finally {
         set({ isLoading: false })
       }
@@ -60,9 +60,9 @@ type AuthState = {
         await axios.post("/api/auth/logout")
         set({ authUser: null })
         toast.success("Logged out successfully")
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.log(error)
-        toast.error(error.response?.result?.message || "Something went wrong")
+        toast.error("Something went wrong")
       } finally {
         set({ isLoading: false })
       }

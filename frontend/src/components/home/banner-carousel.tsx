@@ -94,7 +94,7 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
               <CarouselItem key={item.id} className="w-full">
                 <Card className="border-0 shadow-none">
                   <CardContent className="p-0">
-                    <div className="relative h-64 md:h-100 w-full bg-pink-200 rounded-2xl overflow-hidden">
+                    <div className="relative h-64 md:h-111 w-full bg-pink-200 rounded-2xl overflow-hidden">
                       <img
                         src={
                           item.thumbnailImage

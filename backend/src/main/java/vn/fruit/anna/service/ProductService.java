@@ -39,5 +39,11 @@ public class ProductService {
         return productRepository.findAllByThumbnailImageIsNotNull();
     }
 
+    public List<Product> getRandom12Products() {
+        return productRepository.findRandom12Products();
+    }
 
+    public List<Product> get8NewestProducts() {
+        return productRepository.find8NewestProducts();
+    }
 }
