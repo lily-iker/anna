@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
+import vn.fruit.anna.enums.BannerType;
 
 @Entity
 @Getter
@@ -20,4 +21,5 @@ public class Banner extends BaseEntity {
     private String title;
 
     private String thumbnailImage;
+    private BannerType bannerType;
 }

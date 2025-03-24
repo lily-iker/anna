@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import vn.fruit.anna.enums.TokenType;
+import vn.fruit.anna.model.User;
 
 import java.security.Key;
 import java.util.*;
@@ -30,14 +31,14 @@ public class JwtService {
     @Value("${jwt.refreshKey}")
     private String refreshKey;
 
-    public String generateAccessToken(UserDetails userDetails) {
-        return generateAccessToken(Map.of("scope", buildScope(userDetails.getAuthorities())), userDetails);
+    public String generateAccessToken(User user) {
+        return generateAccessToken(Map.of("scope", buildScope(user.getAuthorities())), user);
     }
 
-    public String generateAccessToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateAccessToken(Map<String, Object> claims, User user) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer("https://github.com/lily-iker")
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpiryTime))
@@ -45,14 +46,14 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
-        return generateRefreshToken(new HashMap<>(), userDetails);
+    public String generateRefreshToken(User user) {
+        return generateRefreshToken(new HashMap<>(), user);
     }
 
-    public String generateRefreshToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateRefreshToken(Map<String, Object> claims, User user) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer("https://github.com/lily-iker")
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpiryTime))
@@ -60,12 +61,12 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isValidToken(String token, TokenType tokenType, UserDetails userDetails) {
-        String username = extractUsername(token, tokenType);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token, tokenType);
+    public boolean isValidToken(String token, TokenType tokenType, User user) {
+        String email = extractEmail(token, tokenType);
+        return email.equals(user.getEmail()) && !isTokenExpired(token, tokenType);
     }
 
-    public String extractUsername(String token, TokenType tokenType) {
+    public String extractEmail(String token, TokenType tokenType) {
         return extractClaims(token, tokenType, Claims::getSubject);
     }
 

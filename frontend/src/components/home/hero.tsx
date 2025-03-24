@@ -46,7 +46,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
         setApi={setApi}
       >
         <CarouselContent>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <CarouselItem key={item.id} className="w-full">
               <section
                 className="relative bg-cover bg-center h-[500px] grid grid-cols-12 items-center px-4"
@@ -55,18 +55,17 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                   backgroundPosition: "center right",
                 }}
               >
+                {/* Overlay */}
                 <div className="absolute inset-0 bg-black/20"></div>
-                <div className="col-span-12 md:col-span-5 md:col-start-2 relative z-10 text-center md:text-left">
-                  {/* <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
-                    {item.title}
-                  </h1>
-                  <p className="text-lg text-gray-200 mb-6">
-                    {item.subtitle}
-                  </p> */}
-                  {/* <Button className="bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-4xl w-48">
-                    Khám phá
-                  </Button> */}
-                </div>
+
+                {/* Button only for the first item */}
+                {index === 0 && (
+                  <div className="absolute top-[64%] left-[28%] transform -translate-x-1/2 z-20">
+                    <Button className="bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-4xl w-48">
+                      Khám phá
+                    </Button>
+                  </div>
+                )}
               </section>
             </CarouselItem>
           ))}

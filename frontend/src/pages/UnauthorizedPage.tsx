@@ -6,7 +6,7 @@ export default function UnauthorizedPage() {
 	const navigate = useNavigate();
 
 	return (
-		<div className='h-screen bg-neutral-900 flex items-center justify-center'>
+		<div className='h-screen bg-white flex items-center justify-center'>
 			<div className='text-center space-y-8 px-4'>
 				{/* Large animated musical note */}
 				{/* <div className='flex justify-center animate-bounce'>

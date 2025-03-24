@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import vn.fruit.anna.enums.TokenType;
+import vn.fruit.anna.model.User;
 import vn.fruit.anna.service.JwtService;
 import vn.fruit.anna.service.UserService;
 
@@ -38,15 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = authorization.substring("Bearer ".length());
-        final String username = jwtService.extractUsername(token, TokenType.ACCESS_TOKEN);
+        final String email = jwtService.extractEmail(token, TokenType.ACCESS_TOKEN);
 
-        if (!username.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.loadUserByUsername(username);
-            if (jwtService.isValidToken(token, TokenType.ACCESS_TOKEN, userDetails)) {
+        if (!email.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = userService.loadUserByUsername(email);
+            if (jwtService.isValidToken(token, TokenType.ACCESS_TOKEN, user)) {
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,
                         null,
-                        userDetails.getAuthorities());
+                        user.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);

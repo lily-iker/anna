@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import vn.fruit.anna.enums.BannerType;
 import vn.fruit.anna.enums.RoleName;
 import vn.fruit.anna.enums.Unit;
 import vn.fruit.anna.model.*;
@@ -62,11 +63,11 @@ public class DataInitializer {
 
         List<Category> categories = List.of(
                 Category.builder().name("Trái cây nhập khẩu")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752234/banner_2_fqv9xi.jpg").build(),
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742819903/danh_m%E1%BB%A5c_pre_xatkoe.jpg").build(),
                 Category.builder().name("Trái cây theo mùa")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752234/banner_2_fqv9xi.jpg").build(),
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742819903/danh_m%E1%BB%A5c_pre_xatkoe.jpg").build(),
                 Category.builder().name("Combo ưu đãi")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752234/banner_2_fqv9xi.jpg").build()
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742819903/danh_m%E1%BB%A5c_pre_xatkoe.jpg").build()
         );
         categoryRepository.saveAll(categories);
         System.out.println("✅ Categories inserted.");
@@ -250,15 +251,62 @@ public class DataInitializer {
         if (bannerRepository.count() > 0) return;
 
         List<Banner> banners = List.of(
-                Banner.builder().title("Khuyến mãi mùa hè")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752112/banner_blog1_a48mor.jpg").build(),
+                // TOP banners
+                Banner.builder()
+                        .title("Khuyến mãi mùa hè")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/banner_top_1_bfiwnc.jpg")
+                        .bannerType(BannerType.TOP)
+                        .build(),
 
-                Banner.builder().title("Trái cây nhập khẩu giảm giá")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752112/banner_blog1_a48mor.jpg").build(),
+                Banner.builder()
+                        .title("Giảm giá cuối tuần")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818691/banner_top_2_uhp0nb.jpg")
+                        .bannerType(BannerType.TOP)
+                        .build(),
 
-                Banner.builder().title("Miễn phí giao hàng")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752112/banner_blog1_a48mor.jpg").build()
-        );
+                Banner.builder()
+                        .title("Trái cây tươi mỗi ngày")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
+                        .bannerType(BannerType.TOP)
+                        .build(),
+
+                // ABOUT_US banners
+                Banner.builder()
+                        .title("Chúng tôi là ai?")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
+                        .bannerType(BannerType.ABOUT_US)
+                        .build(),
+
+                Banner.builder()
+                        .title("Sứ mệnh của chúng tôi")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
+                        .bannerType(BannerType.ABOUT_US)
+                        .build(),
+
+                Banner.builder()
+                        .title("Cam kết chất lượng")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
+                        .bannerType(BannerType.ABOUT_US)
+                        .build(),
+
+                // CONTACT banners
+                Banner.builder()
+                        .title("Hỗ trợ 24/7")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752113/contact_1.jpg")
+                        .bannerType(BannerType.CONTACT)
+                        .build(),
+
+                Banner.builder()
+                        .title("Địa chỉ cửa hàng")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752113/contact_2.jpg")
+                        .bannerType(BannerType.CONTACT)
+                        .build(),
+
+                Banner.builder()
+                        .title("Liên hệ ngay")
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752113/contact_3.jpg")
+                        .bannerType(BannerType.CONTACT)
+                        .build());
 
         bannerRepository.saveAll(banners);
         System.out.println("✅ Banners inserted.");

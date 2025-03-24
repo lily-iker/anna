@@ -25,12 +25,12 @@ public class AuthenticationService {
 
     public TokenResponse authenticate(SignInRequest request, HttpServletResponse response) {
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(),
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),
                 request.getPassword()));
 
-        var user = userRepository.findByUsername(request.getUsername())
+        var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found with username: " + request.getUsername()));
+                        new UsernameNotFoundException("User not found with email: " + request.getEmail()));
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -74,7 +74,7 @@ public class AuthenticationService {
             throw new RuntimeException("Token can not be blank");
         }
 
-        final String username = jwtService.extractUsername(refreshToken, TokenType.REFRESH_TOKEN);
+        final String username = jwtService.extractEmail(refreshToken, TokenType.REFRESH_TOKEN);
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));

@@ -11,14 +11,18 @@ interface ProductStoreState {
   newProducts: Product[]
   random12Products: Product[]
   categories: Category[]
-  banners: Banner[]
+  topBanners: Banner[]
+  aboutUsBanners: Banner[]
+  contactBanners: Banner[]
   blogs: Blog[]
 
   // Actions
   fetchNewProducts: () => Promise<void>
   fetchRandom12Products: () => Promise<void>
   fetchCategories: () => Promise<void>
-  fetchBanners: () => Promise<void>
+  fetchTopBanners: () => Promise<void>
+  fetchAboutUsBanners: () => Promise<void>
+  fetchContactBanners: () => Promise<void>
   fetchBlogs: () => Promise<void>
 }
 
@@ -30,7 +34,9 @@ const useProductStore = create<ProductStoreState>((set) => ({
   newProducts: [],
   random12Products: [],
   categories: [],
-  banners: [],
+  topBanners: [],
+  aboutUsBanners: [],
+  contactBanners: [],
   blogs: [],
 
   // Actions
@@ -76,19 +82,38 @@ const useProductStore = create<ProductStoreState>((set) => ({
     }
   },
 
-  fetchBanners: async () => {
-    try {
-      set({ isLoading: true, error: null })
-      const response = await axios.get("/api/banner/all")
-      set({ banners: response.data.result, isLoading: false })
-    } catch (error) {
-      console.error("Error fetching banners:", error)
-      set({
-        isLoading: false,
-        error: "Failed to fetch banners. Please try again.",
-      })
-    }
-  },
+    fetchTopBanners: async () => {
+      try {
+        set({ isLoading: true, error: null })
+        const response = await axios.get("/api/banner/top")
+        set({ topBanners: response.data.result, isLoading: false })
+      } catch (error) {
+        console.error("Error fetching top banners:", error)
+        set({ isLoading: false, error: "Failed to fetch top banners." })
+      }
+    },
+  
+    fetchAboutUsBanners: async () => {
+      try {
+        set({ isLoading: true, error: null })
+        const response = await axios.get("/api/banner/about-us")
+        set({ aboutUsBanners: response.data.result, isLoading: false })
+      } catch (error) {
+        console.error("Error fetching about us banners:", error)
+        set({ isLoading: false, error: "Failed to fetch about us banners." })
+      }
+    },
+  
+    fetchContactBanners: async () => {
+      try {
+        set({ isLoading: true, error: null })
+        const response = await axios.get("/api/banner/contact")
+        set({ contactBanners: response.data.result, isLoading: false })
+      } catch (error) {
+        console.error("Error fetching contact banners:", error)
+        set({ isLoading: false, error: "Failed to fetch contact banners." })
+      }
+    },
 
   fetchBlogs: async () => {
     try {

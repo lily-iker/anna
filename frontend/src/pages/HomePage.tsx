@@ -12,31 +12,41 @@ import Feature from "@/components/home/feature"
 
 export default function HomePage() {
 
-  const { 
-    newProducts, 
-    random12Products, 
-    categories, 
-    banners, 
-    blogs, 
-    fetchNewProducts, 
-    fetchRandom12Products, 
-    fetchCategories, 
-    fetchBanners, 
-    fetchBlogs 
+  const {
+    newProducts,
+    random12Products,
+    categories,
+    blogs,
+    topBanners,
+    aboutUsBanners,
+
+    fetchNewProducts,
+    fetchRandom12Products,
+    fetchCategories,
+    fetchBlogs,
+    fetchTopBanners,
+    fetchAboutUsBanners,
   } = useProductStore()
-  
+
   useEffect(() => {
-    // Fetch data when component mounts
     fetchNewProducts()
     fetchRandom12Products()
     fetchCategories()
-    fetchBanners()
     fetchBlogs()
-  }, [fetchNewProducts, fetchRandom12Products, fetchCategories, fetchBanners, fetchBlogs])
+    fetchTopBanners()
+    fetchAboutUsBanners()
+  }, [
+    fetchNewProducts,
+    fetchRandom12Products,
+    fetchCategories,
+    fetchBlogs,
+    fetchTopBanners,
+    fetchAboutUsBanners,
+  ])
 
   return (
     <>
-      <Hero items={banners}/>
+      <Hero items={topBanners}/>
 
       <div className="container mx-auto space-y-16 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
 
@@ -51,7 +61,7 @@ export default function HomePage() {
         <ProductList title="Sản phẩm" products={random12Products} />
         <SectionDivider />
 
-        <BannerCarousel items={banners}/>
+        <BannerCarousel items={aboutUsBanners}/>
         <SectionDivider />
 
         <Feature/>

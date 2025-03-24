@@ -96,11 +96,7 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
                   <CardContent className="p-0">
                     <div className="relative h-64 md:h-111 w-full bg-pink-200 rounded-2xl overflow-hidden">
                       <img
-                        src={
-                          item.thumbnailImage
-                            ? "https://res.cloudinary.com/dschfkj54/image/upload/v1742752234/banner_2_fqv9xi.jpg"
-                            : "https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg"
-                        }
+                        src={item.thumbnailImage}
                         alt={item.title}
                         className="absolute inset-0 w-full h-full object-cover"
                       />

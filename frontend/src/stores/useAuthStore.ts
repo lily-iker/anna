@@ -15,7 +15,7 @@ type AuthState = {
   
     setAuthUser: (user: AuthUserType | null) => void;
     fetchAuthUser: () => Promise<void>;
-    login: (username: string, password: string) => Promise<void>
+    login: (email: string, password: string) => Promise<void>
     logout: () => Promise<void>
   
   };
@@ -30,7 +30,7 @@ type AuthState = {
       set({ isLoading: true });
       try {
         const res = await axios.get("/api/user/my-account");
-        
+        console.log(res.data.result)
         set({ authUser: res.data.result });
       } catch (error) {
         console.error(error);
@@ -39,15 +39,16 @@ type AuthState = {
       }
     },
   
-    login: async (username: string, password: string) => {
+    login: async (email: string, password: string) => {
       set({ isLoading: true })
       try {
-        await axios.post("/api/auth/login", { username, password })
+        await axios.post("/api/auth/login", { email, password })
         await useAuthStore.getState().fetchAuthUser()
         toast.success("Logged in successfully")
       } catch (error: unknown) {
         console.log(error)
-        toast.error("Wrong username or passsword. Please try again")
+        toast.error("Wrong email or passsword. Please try again")
+        throw error
       } finally {
         set({ isLoading: false })
       }

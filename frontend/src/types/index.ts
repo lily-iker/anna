@@ -16,6 +16,7 @@ export interface Product {
     id: number
     title: string
     thumbnailImage: string
+    bannerType: string
   }
 
   export interface Blog {

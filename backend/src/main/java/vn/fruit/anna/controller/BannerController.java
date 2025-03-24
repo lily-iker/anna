@@ -32,4 +32,31 @@ public class BannerController {
                         bannerService.getAllBanners())
         );
     }
+
+    @GetMapping("/top")
+    public ResponseEntity<?> getTopBanners() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(200,
+                        "Get TOP banners success",
+                        bannerService.getAllTopBanners())
+        );
+    }
+
+    @GetMapping("/about-us")
+    public ResponseEntity<?> getAboutUsBanners() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(200,
+                        "Get ABOUT_US banners success",
+                        bannerService.getAllAboutUsBanners())
+        );
+    }
+
+    @GetMapping("/contact")
+    public ResponseEntity<?> getContactBanners() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(200,
+                        "Get CONTACT banners success",
+                        bannerService.getAllContactBanners())
+        );
+    }
 }
