@@ -48,11 +48,11 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2">
               <img 
-                src="https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg" 
+                src="https://res.cloudinary.com/dschfkj54/image/upload/v1742753030/485713948_632125426372122_1685471156183650104_n_idq8lr.png" 
                 alt="Anna Logo" 
                 className="h-10 w-auto"
               />
-              <div>Anna Shop</div>
+              {/* <div>Anna Shop</div> */}
             </Link>
           </div>
           

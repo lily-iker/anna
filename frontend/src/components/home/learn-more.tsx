@@ -3,7 +3,7 @@ export default function LearnMore() {
     <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-md">
       {/* Background image */}
       <img
-        src="/image/banner-bg.png"
+        src="https://res.cloudinary.com/dnvyuomtd/image/upload/v1742787800/bannerblog2_qjoqhn_uvzqab.jpg"
         alt="Anna Shop Banner"
         className="w-full h-full object-cover"
       />
@@ -15,8 +15,8 @@ export default function LearnMore() {
         </span>
         <a href="https://zalo.me" target="_blank" rel="noopener noreferrer">
           <img
-            src="/image/zalo-icon.png"
-            className="s-5 sm:s-6"
+            src="https://res.cloudinary.com/dr4kiyshe/image/upload/v1742799702/zalo-icon_utkta5.png"
+            className="s-3 sm:s-4"
           />
         </a>
       </div>

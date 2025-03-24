@@ -63,9 +63,9 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                   <p className="text-lg text-gray-200 mb-6">
                     {item.subtitle}
                   </p> */}
-                  <Button className="bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-4xl w-48">
+                  {/* <Button className="bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-4xl w-48">
                     Khám phá
-                  </Button>
+                  </Button> */}
                 </div>
               </section>
             </CarouselItem>

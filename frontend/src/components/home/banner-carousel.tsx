@@ -98,13 +98,13 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
                       <img
                         src={
                           item.thumbnailImage
-                            ? item.thumbnailImage
+                            ? "https://res.cloudinary.com/dschfkj54/image/upload/v1742752234/banner_2_fqv9xi.jpg"
                             : "https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg"
                         }
                         alt={item.title}
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 flex flex-col justify-center p-8">
+                      {/* <div className="absolute inset-0 flex flex-col justify-center p-8">
                         <div className="max-w-md">
                           <h3 className="text-2xl md:text-3xl font-bold text-blue-500 mb-2">{item.title}</h3>
                           <div className="flex items-center mb-4">
@@ -112,7 +112,7 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
                             <span className="text-4xl font-bold text-red-500">{item.title}</span>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </CardContent>
                 </Card>

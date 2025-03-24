@@ -82,7 +82,7 @@ export default function Footer() {
 
         {/* Bottom navigation */}
         <div className="border-t border-gray-200 pt-6">
-          <div className="flex justify-center space-x-12 text-center">
+          {/* <div className="flex justify-center space-x-12 text-center">
             <div className="flex flex-col items-center">
               <MessageCircle className="h-6 w-6 text-green-600 mb-1" />
               <span className="text-xs text-gray-600">Miễn phí vận chuyển</span>
@@ -95,7 +95,7 @@ export default function Footer() {
               <Heart className="h-6 w-6 text-green-600 mb-1" />
               <span className="text-xs text-gray-600">Ưu đãi đặc biệt</span>
             </div>
-          </div>
+          </div> */}
 
           <div className="text-center mt-6 text-xs text-gray-500">
             © {new Date().getFullYear()} Anna Fruit Import. All rights reserved.

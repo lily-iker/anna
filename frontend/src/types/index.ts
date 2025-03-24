@@ -2,7 +2,7 @@ export interface Product {
     id: string
     name: string
     originalPrice: number
-    image: string
+    thumbnailImage: string
     discountPrice?: number
   }
   

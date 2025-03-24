@@ -16,7 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-0">
         <div className="relative h-48 bg-gray-100 rounded-t-2xl overflow-hidden">
           <img
-            src="https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg"
+            src={product.thumbnailImage}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -39,7 +39,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 justify-center">
-        <Button variant="outline" size="sm" className="text-sm font-medium sm:w-30 lg:w-50">
+        <Button 
+        variant="outline" 
+        size="sm" 
+        className="text-sm font-medium sm:w-30 lg:w-50 hover:cursor-pointer hover:bg-[#9DE25C]"
+        >
           Mua ngay
         </Button>
       </CardFooter>
