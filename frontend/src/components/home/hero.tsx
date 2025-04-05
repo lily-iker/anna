@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useRef, useState, useEffect, useCallback } from "react"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
-import Autoplay from "embla-carousel-autoplay"
-import { Button } from "@/components/ui/button"
-import { Banner } from "@/types"
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
+import Autoplay from 'embla-carousel-autoplay'
+import { Button } from '@/components/ui/button'
+import { Banner } from '@/types'
 
 interface HeroCarouselProps {
   items: Banner[]
@@ -17,23 +17,26 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
     Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
   )
 
-  const scrollTo = useCallback((index: number) => {
-    api?.scrollTo(index)
-  }, [api])
+  const scrollTo = useCallback(
+    (index: number) => {
+      api?.scrollTo(index)
+    },
+    [api]
+  )
 
   useEffect(() => {
     if (!api) return
 
     const onSelect = () => setCurrent(api.selectedScrollSnap())
 
-    api.on("select", onSelect)
-    api.on("reInit", onSelect)
-    api.on("init", onSelect)
+    api.on('select', onSelect)
+    api.on('reInit', onSelect)
+    api.on('init', onSelect)
 
     return () => {
-      api.off("select", onSelect)
-      api.off("reInit", onSelect)
-      api.off("init", onSelect)
+      api.off('select', onSelect)
+      api.off('reInit', onSelect)
+      api.off('init', onSelect)
     }
   }, [api])
 
@@ -41,7 +44,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
     <div className="relative">
       <Carousel
         className="w-full"
-        opts={{ align: "center", loop: true }}
+        opts={{ align: 'center', loop: true }}
         plugins={[autoplayRef.current]}
         setApi={setApi}
       >
@@ -52,7 +55,8 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                 className="relative bg-cover bg-center h-[500px] grid grid-cols-12 items-center px-4"
                 style={{
                   backgroundImage: `url('${item.thumbnailImage}')`,
-                  backgroundPosition: "center right",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
                 }}
               >
                 {/* Overlay */}
@@ -79,7 +83,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
             key={index}
             onClick={() => scrollTo(index)}
             className={`size-2 rounded-full transition-colors duration-300 ${
-              current === index ? "bg-white" : "bg-white/50"
+              current === index ? 'bg-white' : 'bg-white/50'
             } hover:bg-white/80`}
           />
         ))}

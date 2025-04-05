@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
-import { Card, CardContent } from "@/components/ui/card"
-import Autoplay from "embla-carousel-autoplay"
-import type { Category } from "@/types"
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
+import { Card, CardContent } from '@/components/ui/card'
+import Autoplay from 'embla-carousel-autoplay'
+import type { Category } from '@/types'
 
 interface CategoryCarouselProps {
   items: Category[]
@@ -17,12 +17,12 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
 
   // Create a ref for the autoplay plugin
   const autoplayRef = useRef(
-    Autoplay({ 
-      delay: 3000, 
-      stopOnInteraction: false, 
-      stopOnMouseEnter: true, 
-      playOnInit: true 
-    }),
+    Autoplay({
+      delay: 3000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      playOnInit: true,
+    })
   )
 
   // Use callback for scrollTo to prevent recreation on each render
@@ -30,7 +30,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
     (index: number) => {
       api?.scrollTo(index)
     },
-    [api],
+    [api]
   )
 
   // Initialize and update carousel state
@@ -57,14 +57,14 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
     onReady()
 
     // Set up event listeners
-    api.on("select", onSelect)
-    api.on("reInit", onReady)
-    api.on("init", onReady)
+    api.on('select', onSelect)
+    api.on('reInit', onReady)
+    api.on('init', onReady)
 
     return () => {
-      api.off("select", onSelect)
-      api.off("reInit", onReady)
-      api.off("init", onReady)
+      api.off('select', onSelect)
+      api.off('reInit', onReady)
+      api.off('init', onReady)
     }
   }, [api, items, count])
 
@@ -83,7 +83,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
         <Carousel
           className="w-full"
           opts={{
-            align: "center",
+            align: 'center',
             loop: true,
           }}
           plugins={[autoplayRef.current]}
@@ -99,7 +99,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
                         src={
                           item.thumbnailImage
                             ? item.thumbnailImage
-                            : "https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg"
+                            : 'https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg'
                         }
                         alt={item.name}
                         className="absolute inset-0 w-full h-full object-cover"
@@ -128,7 +128,7 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
               key={index}
               onClick={() => scrollTo(index)}
               className={`size-2 rounded-full transition-colors duration-300 ${
-                current === index ? "bg-white" : "bg-white/50"
+                current === index ? 'bg-white' : 'bg-white/50'
               } hover:bg-white/80 focus:outline-none`}
             />
           ))}
@@ -137,4 +137,3 @@ export default function CategoryCarousel({ items }: CategoryCarouselProps) {
     </>
   )
 }
-

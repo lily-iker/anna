@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 
 export default function Footer() {
   return (
@@ -10,10 +10,14 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-2">Giữ liên lạc với chúng tôi</h3>
             <p className="text-sm text-gray-600 mb-4">
-              Nhấn "Nhận" để được biết thêm những thông tin mới nhất về sản phẩm, chương trình giảm giá của chúng tôi!
+              Nếu bạn có bất kỳ ý kiến nào để giúp chúng tôi cải thiện, hãy nhấn vào nút 'Góp ý' bên
+              dưới – mọi phản hồi của bạn đều rất quý giá! !
             </p>
-            <Button variant="outline" className="rounded-full px-6 hover:cursor-pointer hover:bg-[#9DE25C]">
-              Nhận
+            <Button
+              variant="outline"
+              className="rounded-full px-6 hover:cursor-pointer hover:bg-[#9DE25C]"
+            >
+              Góp ý
             </Button>
           </div>
 
@@ -65,7 +69,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-2">Kết nối với chúng tôi</h3>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li>Địa chỉ: 121 Phan, Đình Giốt - La Khê - Hà Đông</li>
+              <li>Địa chỉ: 121 Phan Đình Giốt - La Khê - Hà Đông</li>
               <li>Hotline: 038 623 6288</li>
               <li className="flex items-center space-x-2">
                 <span>Facebook</span>
@@ -89,4 +93,3 @@ export default function Footer() {
     </footer>
   )
 }
-
