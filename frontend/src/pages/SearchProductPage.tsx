@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
-import { Filter, Loader2, Search, X } from 'lucide-react'
+import { Filter, Search, X } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { Pagination } from '@/components/ui/pagination'
 import useProductStore from '@/stores/useProductStore'
@@ -35,7 +35,7 @@ export default function SearchProductPage() {
     setSearchFilters,
   } = useProductStore()
 
-  const { categories, fetchCategories, isLoading: isCategoriesLoading } = useCategoryStore()
+  const { categories, fetchCategories } = useCategoryStore()
 
   // Local state for form inputs
   const [searchTerm, setSearchTerm] = useState(queryParams.get('q') || '')
@@ -47,7 +47,9 @@ export default function SearchProductPage() {
     queryParams.get('category')
   )
   const [showFilters, setShowFilters] = useState(false)
-  const [tableLoading, setTableLoading] = useState(false)
+
+  // Local state for pagination to ensure smooth UI updates
+  const [localPageSize, setLocalPageSize] = useState(pageSize)
 
   // Pagination state
   const [pageSizeOptions] = useState([10, 12, 16, 24])
@@ -69,50 +71,45 @@ export default function SearchProductPage() {
     const minPrice = Number(queryParams.get('minPrice') || 0)
     const maxPrice = Number(queryParams.get('maxPrice') || 800000)
     const page = Number(queryParams.get('page') || 1)
+    const size = Number(queryParams.get('size') || pageSize)
 
     setSearchTerm(initialSearch)
     setSelectedCategory(initialCategory)
     setPriceRange([minPrice, maxPrice])
+    setLocalPageSize(size)
 
     setSearchFilters(initialSearch, minPrice, maxPrice, initialCategory)
     fetchProducts({
       page,
+      size,
       name: initialSearch,
       minPrice,
       maxPrice,
       categoryName: initialCategory || undefined,
     })
-  }, [location.search, fetchProducts, setSearchFilters])
+  }, [location.search, fetchProducts, setSearchFilters, pageSize])
 
-  // Update table loading state when isLoading changes
+  // Sync local page size with store page size
   useEffect(() => {
-    if (!isLoading) {
-      // Add a small delay to make transitions smoother
-      const timer = setTimeout(() => {
-        setTableLoading(false)
-      }, 300)
-      return () => clearTimeout(timer)
-    } else {
-      setTableLoading(true)
-    }
-  }, [isLoading])
+    setLocalPageSize(pageSize)
+  }, [pageSize])
 
   // Handle search and filter submission
   const handleSearch = () => {
-    setTableLoading(true)
-
     // Update URL with search params
     const params = new URLSearchParams()
     if (searchTerm) params.set('q', searchTerm)
     if (selectedCategory) params.set('category', selectedCategory)
     params.set('minPrice', priceRange[0].toString())
     params.set('maxPrice', priceRange[1].toString())
+    params.set('size', localPageSize.toString())
 
     navigate(`/search?${params.toString()}`)
 
     setSearchFilters(searchTerm, priceRange[0], priceRange[1], selectedCategory)
     fetchProducts({
       page: 1,
+      size: localPageSize,
       name: searchTerm,
       minPrice: priceRange[0],
       maxPrice: priceRange[1],
@@ -125,13 +122,13 @@ export default function SearchProductPage() {
     setSearchTerm('')
     setPriceRange([0, 800000])
     setSelectedCategory(null)
-    setTableLoading(true)
 
-    navigate('/search')
+    navigate(`/search?size=${localPageSize}`)
 
     setSearchFilters('', 0, 800000, null)
     fetchProducts({
       page: 1,
+      size: localPageSize,
       name: '',
       minPrice: 0,
       maxPrice: 800000,
@@ -142,28 +139,34 @@ export default function SearchProductPage() {
   const handlePageChange = useCallback(
     (page: number) => {
       if (page !== currentPage) {
-        setTableLoading(true)
-
         // Update URL with page param
         const params = new URLSearchParams(location.search)
         params.set('page', page.toString())
         navigate(`/search?${params.toString()}`)
 
-        fetchProducts({ page })
+        fetchProducts({ page, size: localPageSize })
       }
     },
-    [currentPage, fetchProducts, location.search, navigate]
+    [currentPage, fetchProducts, location.search, navigate, localPageSize]
   )
 
   const handlePageSizeChange = (size: string) => {
-    setTableLoading(true)
+    const sizeNum = Number.parseInt(size)
+    setLocalPageSize(sizeNum) // Update local state immediately for UI
 
     // Update URL with size param
     const params = new URLSearchParams(location.search)
     params.set('size', size)
     navigate(`/search?${params.toString()}`)
 
-    fetchProducts({ page: 1, size: Number.parseInt(size) })
+    fetchProducts({
+      page: 1,
+      size: sizeNum,
+      name: searchTerm,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+      categoryName: selectedCategory || undefined,
+    })
   }
 
   return (
@@ -187,7 +190,6 @@ export default function SearchProductPage() {
 
           <div className="flex gap-2">
             <Button onClick={handleSearch} disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Tìm kiếm
             </Button>
 
@@ -217,7 +219,6 @@ export default function SearchProductPage() {
                 <Select
                   value={selectedCategory || 'all'}
                   onValueChange={(value) => setSelectedCategory(value === 'all' ? null : value)}
-                  disabled={isCategoriesLoading}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Tất cả danh mục" />
@@ -264,13 +265,9 @@ export default function SearchProductPage() {
 
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-500">Hiển thị:</span>
-          <Select
-            value={pageSize.toString()}
-            onValueChange={handlePageSizeChange}
-            disabled={isLoading}
-          >
+          <Select value={localPageSize.toString()} onValueChange={handlePageSizeChange}>
             <SelectTrigger className="w-[80px]">
-              <SelectValue placeholder={pageSize.toString()} />
+              <SelectValue placeholder={localPageSize.toString()} />
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((size) => (
@@ -284,33 +281,26 @@ export default function SearchProductPage() {
       </div>
 
       {/* Products Grid with loading state */}
-      {tableLoading && (
-        <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 backdrop-blur-[1px]">
-          <div className="flex flex-col items-center">
-            <Loader2 className="size-8 text-green-500 animate-spin" />
-            <span className="mt-2 text-sm text-gray-600">Đang tải...</span>
+      <div className="relative">
+        {products.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">
+              Không tìm thấy sản phẩm nào phù hợp với tiêu chí tìm kiếm
+            </p>
+            {(searchTerm || selectedCategory || priceRange[0] > 0 || priceRange[1] < 800000) && (
+              <Button variant="outline" onClick={handleResetFilters} className="mt-2">
+                Xóa bộ lọc
+              </Button>
+            )}
           </div>
-        </div>
-      )}
-
-      {products.length === 0 && !tableLoading ? (
-        <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">
-            Không tìm thấy sản phẩm nào phù hợp với tiêu chí tìm kiếm
-          </p>
-          {(searchTerm || selectedCategory || priceRange[0] > 0 || priceRange[1] < 800000) && (
-            <Button variant="outline" onClick={handleResetFilters} className="mt-2">
-              Xóa bộ lọc
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 p-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 p-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Pagination */}
       <div className="mt-4">

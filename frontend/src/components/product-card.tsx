@@ -1,13 +1,15 @@
+import { memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/format'
-import { Product } from '@/types'
+import type { Product } from '@/types'
 
 interface ProductCardProps {
   product: Product
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+// Create a memoized component to prevent unnecessary re-renders
+function ProductCard({ product }: ProductCardProps) {
   const salePrice = 100000
   const isDiscounted = product.originalPrice > salePrice
 
@@ -16,9 +18,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-0">
         <div className="relative h-48 bg-gray-100 rounded-t-2xl overflow-hidden">
           <img
-            src={product.thumbnailImage}
+            src={product.thumbnailImage || '/placeholder.svg?height=300&width=400'}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy" // Add lazy loading
+            decoding="async" // Add async decoding
           />
         </div>
         <div className="pt-2 lg:pt-4 text-center">
@@ -48,3 +52,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Card>
   )
 }
+
+// Export the memoized version
+export default memo(ProductCard)

@@ -1,22 +1,37 @@
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, memo } from 'react'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { Button } from '@/components/ui/button'
-import { Banner } from '@/types'
+import type { Banner } from '@/types'
 
 interface HeroCarouselProps {
   items: Banner[]
 }
 
+// Create a memoized dot component to prevent unnecessary re-renders
+const CarouselDot = memo(
+  ({ index, current, onClick }: { index: number; current: number; onClick: () => void }) => (
+    <button
+      onClick={onClick}
+      className={`size-2 rounded-full transition-colors duration-300 ${
+        current === index ? 'bg-white' : 'bg-white/50'
+      } hover:bg-white/80`}
+    />
+  )
+)
+
 export default function HeroCarousel({ items }: HeroCarouselProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
+
+  // Use a ref for autoplay to prevent re-creation on each render
   const autoplayRef = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
   )
 
+  // Memoize the scrollTo function to prevent re-creation on each render
   const scrollTo = useCallback(
     (index: number) => {
       api?.scrollTo(index)
@@ -27,18 +42,29 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
   useEffect(() => {
     if (!api) return
 
-    const onSelect = () => setCurrent(api.selectedScrollSnap())
+    // Use a single function for all event handlers to reduce closures
+    const handleSelect = () => setCurrent(api.selectedScrollSnap())
 
-    api.on('select', onSelect)
-    api.on('reInit', onSelect)
-    api.on('init', onSelect)
+    // Set up event listeners
+    api.on('select', handleSelect)
+    api.on('reInit', handleSelect)
+    api.on('init', handleSelect)
 
+    // Set initial value
+    handleSelect()
+
+    // Clean up
     return () => {
-      api.off('select', onSelect)
-      api.off('reInit', onSelect)
-      api.off('init', onSelect)
+      api.off('select', handleSelect)
+      api.off('reInit', handleSelect)
+      api.off('init', handleSelect)
     }
   }, [api])
+
+  // Don't render if no items
+  if (!items || items.length === 0) {
+    return null
+  }
 
   return (
     <div className="relative">
@@ -79,12 +105,11 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
       {/* Dots navigation */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
         {items.map((_, index) => (
-          <button
+          <CarouselDot
             key={index}
+            index={index}
+            current={current}
             onClick={() => scrollTo(index)}
-            className={`size-2 rounded-full transition-colors duration-300 ${
-              current === index ? 'bg-white' : 'bg-white/50'
-            } hover:bg-white/80`}
           />
         ))}
       </div>

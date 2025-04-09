@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import vn.fruit.anna.dto.request.CreateBannerRequest;
 import vn.fruit.anna.dto.request.SignInRequest;
 import vn.fruit.anna.dto.response.ApiResponse;
 import vn.fruit.anna.service.AuthenticationService;

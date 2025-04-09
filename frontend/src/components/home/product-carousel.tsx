@@ -1,20 +1,24 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback } from "react"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
-import ProductCard from "@/components/product-card"
-import { Product } from "@/types"
+import { useState, useEffect, useCallback, memo } from 'react'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
+import ProductCard from '@/components/product-card'
+import type { Product } from '@/types'
 
 interface ProductCarouselProps {
   title: string
   products: Product[]
 }
 
+// Memoize the ProductCard to prevent unnecessary re-renders
+const MemoizedProductCard = memo(ProductCard)
+
 export default function ProductCarousel({ title, products }: ProductCarouselProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
 
+  // Memoize callbacks to prevent unnecessary re-renders
   const scrollPrev = useCallback(() => {
     api?.scrollPrev()
   }, [api])
@@ -28,20 +32,30 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
       return
     }
 
-    const onSelect = () => {
+    // Use a single function for all event handlers to reduce closures
+    const handleApiChange = () => {
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
     }
 
-    api.on("select", onSelect)
-    api.on("reInit", onSelect)
-    onSelect()
+    // Set initial values
+    handleApiChange()
 
+    // Add event listeners
+    api.on('select', handleApiChange)
+    api.on('reInit', handleApiChange)
+
+    // Clean up
     return () => {
-      api.off("select", onSelect)
-      api.off("reInit", onSelect)
+      api.off('select', handleApiChange)
+      api.off('reInit', handleApiChange)
     }
   }, [api])
+
+  // Only render if we have products
+  if (!products || products.length === 0) {
+    return null
+  }
 
   return (
     <div className="relative">
@@ -59,7 +73,13 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
           className="h-8 w-8 rounded-full border border-black bg-white shadow-sm flex items-center justify-center hover:bg-gray-100 disabled:opacity-50"
           aria-label="Previous slide"
         >
-          <svg width="7" height="11" viewBox="0 0 7 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="7"
+            height="11"
+            viewBox="0 0 7 11"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M6 1L1 5.5L6 10"
               stroke="currentColor"
@@ -75,7 +95,13 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
           className="h-8 w-8 rounded-full border border-black bg-white shadow-sm flex items-center justify-center hover:bg-gray-100 disabled:opacity-50"
           aria-label="Next slide"
         >
-          <svg width="7" height="11" viewBox="0 0 7 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="7"
+            height="11"
+            viewBox="0 0 7 11"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M1 1L6 5.5L1 10"
               stroke="currentColor"
@@ -89,7 +115,7 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
 
       <Carousel
         opts={{
-          align: "start",
+          align: 'start',
           loop: true,
         }}
         className="w-full"
@@ -97,8 +123,11 @@ export default function ProductCarousel({ title, products }: ProductCarouselProp
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {products.map((product) => (
-            <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard product={product} />
+            <CarouselItem
+              key={product.id}
+              className="pl-2 md:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+            >
+              <MemoizedProductCard product={product} />
             </CarouselItem>
           ))}
         </CarouselContent>

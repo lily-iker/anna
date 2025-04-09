@@ -1,39 +1,72 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
 import { Link } from 'react-router-dom'
-import { Blog } from '@/types'
+import type { Blog } from '@/types'
 
 interface BlogCarouselProps {
   items: Blog[]
 }
+
+// Create a memoized blog item component
+const BlogItem = memo(({ item }: { item: Blog }) => (
+  <Link to="#" className="group block">
+    <div className="relative h-64 overflow-hidden rounded-lg">
+      <img
+        src={
+          item.thumbnailImage ||
+          'https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg' ||
+          '/placeholder.svg'
+        }
+        alt={item.title}
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy" // Add lazy loading
+        decoding="async" // Add async decoding
+      />
+      <div className="absolute inset-0 bg-black/30 flex items-end p-4">
+        <h3 className="text-white font-medium">{item.title}</h3>
+      </div>
+    </div>
+  </Link>
+))
 
 export default function BlogCarousel({ items }: BlogCarouselProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
 
+  // Memoize callbacks to prevent unnecessary re-renders
   const scrollPrev = useCallback(() => api?.scrollPrev(), [api])
   const scrollNext = useCallback(() => api?.scrollNext(), [api])
 
   useEffect(() => {
     if (!api) return
 
-    const onSelect = () => {
+    // Use a single function for all event handlers to reduce closures
+    const handleApiChange = () => {
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
     }
 
-    api.on('select', onSelect)
-    api.on('reInit', onSelect)
-    onSelect()
+    // Set initial values
+    handleApiChange()
 
+    // Set up event listeners
+    api.on('select', handleApiChange)
+    api.on('reInit', handleApiChange)
+
+    // Clean up
     return () => {
-      api.off('select', onSelect)
-      api.off('reInit', onSelect)
+      api.off('select', handleApiChange)
+      api.off('reInit', handleApiChange)
     }
   }, [api])
+
+  // Don't render if no items
+  if (!items || items.length === 0) {
+    return null
+  }
 
   return (
     <div className="relative">
@@ -100,21 +133,7 @@ export default function BlogCarousel({ items }: BlogCarouselProps) {
               key={item.id}
               className="pl-2 md:pl-4 basis-1/1 sm:basis-1/2 lg:basis-1/3"
             >
-              <Link to="#" className="group block">
-                <div className="relative h-64 overflow-hidden rounded-lg">
-                  <img
-                    src={
-                      item.thumbnailImage ||
-                      'https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg'
-                    }
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/30 flex items-end p-4">
-                    <h3 className="text-white font-medium">{item.title}</h3>
-                  </div>
-                </div>
-              </Link>
+              <BlogItem item={item} />
             </CarouselItem>
           ))}
         </CarouselContent>

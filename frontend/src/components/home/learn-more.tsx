@@ -1,11 +1,15 @@
-export default function LearnMore() {
+import { memo } from 'react'
+
+function LearnMore() {
   return (
     <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-md">
-      {/* Background image */}
+      {/* Background image with loading optimization */}
       <img
         src="https://res.cloudinary.com/dnvyuomtd/image/upload/v1742787800/bannerblog2_qjoqhn_uvzqab.jpg"
         alt="Anna Shop Banner"
         className="w-full h-full object-cover"
+        loading="lazy" // Add lazy loading
+        decoding="async" // Add async decoding
       />
 
       {/* Floating card */}
@@ -17,9 +21,16 @@ export default function LearnMore() {
           <img
             src="https://res.cloudinary.com/dr4kiyshe/image/upload/v1742799702/zalo-icon_utkta5.png"
             className="s-3 sm:s-4"
+            loading="lazy" // Add lazy loading
+            width="24" // Add explicit dimensions
+            height="24"
+            alt="Zalo"
           />
         </a>
       </div>
     </div>
   )
 }
+
+// Export the memoized version
+export default memo(LearnMore)

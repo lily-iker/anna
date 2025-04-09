@@ -1,31 +1,58 @@
-import { Truck, Phone, Tag } from "lucide-react";
+import type React from 'react'
+import { Truck, Phone, Tag } from 'lucide-react'
+import { memo } from 'react'
+
+// Create a memoized feature item component
+const FeatureItem = memo(
+  ({
+    icon: Icon,
+    title,
+    description,
+  }: {
+    icon: React.ElementType
+    title: string
+    description: string
+  }) => (
+    <div className="flex flex-col items-center">
+      <Icon className="h-10 w-10 text-emerald-500 mb-2" />
+      <h4 className="text-base font-semibold text-gray-900 mb-1">{title}</h4>
+      <p className="text-sm text-gray-600 max-w-xs">{description}</p>
+    </div>
+  )
+)
 
 const Feature = () => {
-  return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 text-center">
-        <div className="flex flex-col items-center">
-          <Truck className="h-10 w-10 text-emerald-500 mb-2" />
-          <h4 className="text-base font-semibold text-gray-900 mb-1">Miễn phí vận chuyển</h4>
-          <p className="text-sm text-gray-600 max-w-xs">
-            Cam kết giao hàng nhanh chóng và chất lượng đến tay khách hàng
-          </p>
-        </div>
-        <div className="flex flex-col items-center">
-          <Phone className="h-10 w-10 text-emerald-500 mb-2" />
-          <h4 className="text-base font-semibold text-gray-900 mb-1">Đội ngũ thân thiện</h4>
-          <p className="text-sm text-gray-600 max-w-xs">
-            Đội ngũ thân thiện, dịch vụ tận tâm!
-          </p>
-        </div>
-        <div className="flex flex-col items-center">
-          <Tag className="h-10 w-10 text-emerald-500 mb-2" />
-          <h4 className="text-base font-semibold text-gray-900 mb-1">Ưu đãi đặc biệt</h4>
-          <p className="text-sm text-gray-600 max-w-xs">
-            Ưu đãi hấp dẫn, mua sắm dễ dàng!
-          </p>
-        </div>
-      </div>
-  );
-};
+  const features = [
+    {
+      icon: Truck,
+      title: 'Miễn phí vận chuyển',
+      description: 'Cam kết giao hàng nhanh chóng và chất lượng đến tay khách hàng',
+    },
+    {
+      icon: Phone,
+      title: 'Đội ngũ thân thiện',
+      description: 'Đội ngũ thân thiện, dịch vụ tận tâm!',
+    },
+    {
+      icon: Tag,
+      title: 'Ưu đãi đặc biệt',
+      description: 'Ưu đãi hấp dẫn, mua sắm dễ dàng!',
+    },
+  ]
 
-export default Feature;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 text-center">
+      {features.map((feature, index) => (
+        <FeatureItem
+          key={index}
+          icon={feature.icon}
+          title={feature.title}
+          description={feature.description}
+        />
+      ))}
+    </div>
+  )
+}
+
+// Export the memoized version
+export default memo(Feature)

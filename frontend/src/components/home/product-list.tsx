@@ -1,16 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import { Link } from 'react-router-dom'
-import ProductCard from '@/components/product-card'
 import { Button } from '@/components/ui/button'
 import { ChevronRight } from 'lucide-react'
 import type { Product } from '@/types'
+import ProductCard from '@/components/product-card'
 
 interface ProductListProps {
   title: string
   products: Product[]
 }
+
+// Memoize the ProductCard to prevent unnecessary re-renders
+const MemoizedProductCard = memo(ProductCard)
 
 export default function ProductList({ title, products }: ProductListProps) {
   // Initialize with a default, will be updated in useEffect
@@ -23,25 +26,45 @@ export default function ProductList({ title, products }: ProductListProps) {
       const width = window.innerWidth
       if (width >= 1024) {
         setScreenSize('lg')
-        setVisibleProducts(4)
+        setVisibleProducts((prev) => (prev <= 4 ? 4 : prev)) // Only reset if smaller than default
       } else if (width >= 768) {
         setScreenSize('md')
-        setVisibleProducts(3)
+        setVisibleProducts((prev) => (prev <= 3 ? 3 : prev))
       } else {
         setScreenSize('sm')
-        setVisibleProducts(2)
+        setVisibleProducts((prev) => (prev <= 2 ? 2 : prev))
       }
     }
 
     // Set initial value
     handleResize()
 
+    // Debounce resize event for better performance
+    let timeoutId: ReturnType<typeof setTimeout>
+    const debouncedResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(handleResize, 100)
+    }
+
     // Add event listener
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', debouncedResize)
 
     // Clean up
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', debouncedResize)
+      clearTimeout(timeoutId)
+    }
   }, [])
+
+  // Memoize the displayed products to prevent recalculation on every render
+  const displayedProducts = useMemo(() => {
+    return products.slice(0, visibleProducts)
+  }, [products, visibleProducts])
+
+  // Memoize this value to prevent recalculation on every render
+  const showViewMoreButton = useMemo(() => {
+    return products.length > visibleProducts && visibleProducts < 12
+  }, [products.length, visibleProducts])
 
   const handleViewMore = () => {
     // Add products based on current screen size
@@ -50,12 +73,6 @@ export default function ProductList({ title, products }: ProductListProps) {
     // Increase by the appropriate amount, up to a maximum of 12
     setVisibleProducts((prev) => Math.min(prev + increment, 12))
   }
-
-  // Only show products up to the current visible limit
-  const displayedProducts = products.slice(0, visibleProducts)
-
-  // Determine if the "View More" button should be shown
-  const showViewMoreButton = products.length > visibleProducts && visibleProducts < 12
 
   return (
     <div className="space-y-6">
@@ -75,7 +92,7 @@ export default function ProductList({ title, products }: ProductListProps) {
 
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {displayedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <MemoizedProductCard key={product.id} product={product} />
         ))}
       </div>
 

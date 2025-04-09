@@ -1,72 +1,74 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
-import { Card, CardContent } from "@/components/ui/card"
-import type { Banner } from "@/types"
-import Autoplay from "embla-carousel-autoplay"
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
+import { Card, CardContent } from '@/components/ui/card'
+import type { Banner } from '@/types'
+import Autoplay from 'embla-carousel-autoplay'
 
 interface BannerCarouselProps {
   items: Banner[]
 }
 
+// Create a memoized dot component to prevent unnecessary re-renders
+const CarouselDot = memo(
+  ({ index, current, onClick }: { index: number; current: number; onClick: () => void }) => (
+    <button
+      onClick={onClick}
+      className={`size-2 rounded-full transition-colors duration-300 ${
+        current === index ? 'bg-white' : 'bg-white/50'
+      } hover:bg-white/80 focus:outline-none`}
+    />
+  )
+)
+
 export default function BannerCarousel({ items }: BannerCarouselProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
-  const [count, setCount] = useState(0)
 
-    // Create a ref for the autoplay plugin
-    const autoplayRef = useRef(
-      Autoplay({ 
-        delay: 3000, 
-        stopOnInteraction: false, 
-        stopOnMouseEnter: true, 
-        playOnInit: true 
-      }),
-    )
+  // Use a ref for autoplay to prevent re-creation on each render
+  const autoplayRef = useRef(
+    Autoplay({
+      delay: 3000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      playOnInit: true,
+    })
+  )
 
-  // Use callback for scrollTo to prevent recreation on each render
+  // Memoize the scrollTo function to prevent re-creation on each render
   const scrollTo = useCallback(
     (index: number) => {
       api?.scrollTo(index)
     },
-    [api],
+    [api]
   )
 
-  // Initialize and update carousel state
   useEffect(() => {
     if (!api || items.length === 0) {
       return
     }
 
-    // Set initial count based on items length if API isn't ready yet
-    if (count === 0 && items.length > 0) {
-      setCount(items.length)
-    }
-
-    const onReady = () => {
-      setCount(api.scrollSnapList().length)
+    // Use a single function for all event handlers to reduce closures
+    const handleApiChange = () => {
       setCurrent(api.selectedScrollSnap())
     }
 
-    const onSelect = () => {
-      setCurrent(api.selectedScrollSnap())
-    }
-
-    // Run once on initialization
-    onReady()
+    // Set initial value
+    handleApiChange()
 
     // Set up event listeners
-    api.on("select", onSelect)
-    api.on("reInit", onReady)
-    api.on("init", onReady)
+    api.on('select', handleApiChange)
+    api.on('reInit', handleApiChange)
+    api.on('init', handleApiChange)
 
+    // Clean up
     return () => {
-      api.off("select", onSelect)
-      api.off("reInit", onReady)
-      api.off("init", onReady)
+      api.off('select', handleApiChange)
+      api.off('reInit', handleApiChange)
+      api.off('init', handleApiChange)
     }
-  }, [api, items, count])
+  }, [api, items])
 
   // Make sure we have items before rendering
   if (!items || items.length === 0) {
@@ -74,63 +76,48 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
   }
 
   return (
-    <>
-      {/* <div className="relative w-fit mb-6">
-        <h2 className="text-2xl font-bold">Khuyến Mãi</h2>
-        <div className="absolute left-0 -bottom-1 h-[1.5px] w-full bg-gradient-to-r from-gray-500 via-gray-300 to-transparent"></div>
-      </div> */}
-      <div className="relative select-none">
-        <Carousel
-          className="w-full"
-          opts={{
-            align: "center",
-            loop: true,
-          }}
-          plugins={[autoplayRef.current]}
-          setApi={setApi}
-        >
-          <CarouselContent>
-            {items.map((item) => (
-              <CarouselItem key={item.id} className="w-full">
-                <Card className="border-0 shadow-none">
-                  <CardContent className="p-0">
-                    <div className="relative h-64 md:h-111 w-full bg-pink-200 rounded-2xl overflow-hidden">
-                      <img
-                        src={item.thumbnailImage}
-                        alt={item.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                      {/* <div className="absolute inset-0 flex flex-col justify-center p-8">
-                        <div className="max-w-md">
-                          <h3 className="text-2xl md:text-3xl font-bold text-blue-500 mb-2">{item.title}</h3>
-                          <div className="flex items-center mb-4">
-                            <span className="text-gray-500 mr-2">GIẢM GIÁ</span>
-                            <span className="text-4xl font-bold text-red-500">{item.title}</span>
-                          </div>
-                        </div>
-                      </div> */}
-                    </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-
-        {/* Enhanced dot navigation - will persist after refresh */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
-          {items.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => scrollTo(index)}
-              className={`size-2 rounded-full transition-colors duration-300 ${
-                current === index ? "bg-white" : "bg-white/50"
-              } hover:bg-white/80 focus:outline-none`}
-            />
+    <div className="relative select-none">
+      <Carousel
+        className="w-full"
+        opts={{
+          align: 'center',
+          loop: true,
+        }}
+        plugins={[autoplayRef.current]}
+        setApi={setApi}
+      >
+        <CarouselContent>
+          {items.map((item) => (
+            <CarouselItem key={item.id} className="w-full">
+              <Card className="border-0 shadow-none">
+                <CardContent className="p-0">
+                  <div className="relative h-64 md:h-111 w-full bg-pink-200 rounded-2xl overflow-hidden">
+                    <img
+                      src={item.thumbnailImage || '/placeholder.svg'}
+                      alt={item.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy" // Add lazy loading
+                      decoding="async" // Add async decoding
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
           ))}
-        </div>
+        </CarouselContent>
+      </Carousel>
+
+      {/* Enhanced dot navigation */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+        {items.map((_, index) => (
+          <CarouselDot
+            key={index}
+            index={index}
+            current={current}
+            onClick={() => scrollTo(index)}
+          />
+        ))}
       </div>
-    </>
+    </div>
   )
 }
-

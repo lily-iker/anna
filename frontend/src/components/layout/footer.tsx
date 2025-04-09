@@ -1,7 +1,21 @@
+'use client'
+
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { FeedbackForm } from '../home/feedback-form'
 
 export default function Footer() {
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
+
+  const openFeedbackForm = () => {
+    setIsFeedbackOpen(true)
+  }
+
+  const closeFeedbackForm = () => {
+    setIsFeedbackOpen(false)
+  }
+
   return (
     <footer className="bg-green-50 py-6">
       <div className="container mx-auto px-4">
@@ -16,6 +30,7 @@ export default function Footer() {
             <Button
               variant="outline"
               className="rounded-full px-6 hover:cursor-pointer hover:bg-[#9DE25C]"
+              onClick={openFeedbackForm}
             >
               Góp ý
             </Button>
@@ -90,6 +105,9 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Feedback Form Dialog */}
+      <FeedbackForm isOpen={isFeedbackOpen} onClose={closeFeedbackForm} />
     </footer>
   )
 }

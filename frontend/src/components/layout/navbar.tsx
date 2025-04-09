@@ -61,7 +61,7 @@ export default function Navbar() {
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="#" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/" className="text-gray-700 hover:text-green-600 font-medium">
               Trang chủ
             </Link>
             <div className="relative group">
@@ -75,10 +75,10 @@ export default function Navbar() {
               </Link>
               {/* Dropdown would go here */}
             </div>
-            <Link to="#" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/blog" className="text-gray-700 hover:text-green-600 font-medium">
               Blog
             </Link>
-            <Link to="#" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/contact" className="text-gray-700 hover:text-green-600 font-medium">
               Liên hệ
             </Link>
           </nav>

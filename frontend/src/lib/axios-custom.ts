@@ -59,10 +59,7 @@ instance.interceptors.response.use(
     }
 
     // Check for 403 status or network error that might be due to expired token
-    const isAuthError =
-      (error.response && error.response.status === 401) ||
-      (error.response && error.response.status === 403) ||
-      (error.code === 'ERR_NETWORK' && !originalRequest._retry)
+    const isAuthError = error.response && error.response.status === 401 && !originalRequest._retry
 
     if (!isAuthError) {
       return Promise.reject(error)
@@ -98,9 +95,6 @@ instance.interceptors.response.use(
     } catch (refreshError) {
       // If refresh fails, process the queue with the error
       processQueue(refreshError as AxiosError)
-
-      // Redirect to login page or dispatch logout action
-      window.location.href = '/login'
 
       return Promise.reject(refreshError)
     } finally {

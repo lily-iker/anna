@@ -39,7 +39,7 @@ public class AuthenticationService {
         accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setAttribute("SameSite", "Strict");
-        accessTokenCookie.setMaxAge(60 * 60);
+        accessTokenCookie.setMaxAge(60 * 10);
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
