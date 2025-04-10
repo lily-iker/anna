@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Search, ShoppingCart, User, Menu } from 'lucide-react'
+import { Search, ShoppingCart, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 
@@ -21,11 +21,6 @@ export default function Navbar() {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [location.pathname])
-
-  const handleUserIconClick = (e: React.MouseEvent<HTMLSpanElement>) => {
-    e.stopPropagation()
-    navigate(`/login`)
-  }
 
   //   const scrollToCategory = () => {
   //     const categorySection = document.getElementById("categories");
@@ -92,11 +87,8 @@ export default function Navbar() {
               variant="ghost"
               size="icon"
               className="hover:cursor-pointer"
-              onClick={(e) => handleUserIconClick(e)}
+              onClick={() => navigate('/cart')}
             >
-              <User className="h-5 w-5 text-gray-700" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hover:cursor-pointer">
               <ShoppingCart className="h-5 w-5 text-gray-700" />
             </Button>
 

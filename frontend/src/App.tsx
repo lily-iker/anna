@@ -1,14 +1,10 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { useEffect, useState, lazy } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Loading from './components/loading'
 import MainLayout from './components/layout/main-layout'
 import { useAuthStore } from './stores/useAuthStore'
-import useProductStore from './stores/useProductStore'
-import useCategoryStore from './stores/useCategoryStore'
-import useBlogStore from './stores/useBlogStore'
-import useBannerStore from './stores/useBannerStore'
-import { RouteTransitionProvider } from './router/route-transition'
 import ContactPage from './pages/ContactPage'
+import CartPage from './pages/CartPage'
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -55,6 +51,7 @@ function App() {
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={'/'} />} />
         <Route path="/search" element={<SearchProductPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/cart" element={<CartPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 

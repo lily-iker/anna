@@ -14,7 +14,7 @@ const CategoryItem = memo(({ item, onClick }: { item: Category; onClick: () => v
   <div className="block transition-transform duration-300 hover:scale-[1.02]" onClick={onClick}>
     <Card className="border-0 shadow-none overflow-hidden hover:cursor-pointer">
       <CardContent className="p-0">
-        <div className="relative aspect-[4/3] w-full bg-emerald-700 rounded-lg overflow-hidden">
+        <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden">
           <img
             src={item.thumbnailImage || '/placeholder.svg?height=300&width=400'}
             alt={item.name}
