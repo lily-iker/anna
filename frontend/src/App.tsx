@@ -28,7 +28,7 @@ function App() {
 
   useEffect(() => {
     fetchAuthUser()
-  }, [])
+  }, [fetchAuthUser])
 
   useEffect(() => {
     setIsLoading(true)

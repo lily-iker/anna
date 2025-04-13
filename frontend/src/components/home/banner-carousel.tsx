@@ -5,6 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/com
 import { Card, CardContent } from '@/components/ui/card'
 import type { Banner } from '@/types'
 import Autoplay from 'embla-carousel-autoplay'
+import ResponsiveImage from './responsive-image'
 
 interface BannerCarouselProps {
   items: Banner[]
@@ -91,13 +92,13 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
             <CarouselItem key={item.id} className="w-full">
               <Card className="border-0 shadow-none">
                 <CardContent className="p-0">
-                  <div className="relative h-64 md:h-111 w-full bg-pink-200 rounded-2xl overflow-hidden">
-                    <img
+                  <div className="rounded-2xl overflow-hidden">
+                    <ResponsiveImage
                       src={item.thumbnailImage || '/placeholder.svg'}
                       alt={item.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy" // Add lazy loading
-                      decoding="async" // Add async decoding
+                      aspectRatio="21/9"
+                      objectFit="cover"
+                      className="w-full"
                     />
                   </div>
                 </CardContent>

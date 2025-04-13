@@ -5,6 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/com
 import Autoplay from 'embla-carousel-autoplay'
 import { Button } from '@/components/ui/button'
 import type { Banner } from '@/types'
+import ResponsiveImage from './responsive-image'
 
 interface HeroCarouselProps {
   items: Banner[]
@@ -77,26 +78,26 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
         <CarouselContent>
           {items.map((item, index) => (
             <CarouselItem key={item.id} className="w-full">
-              <section
-                className="relative bg-cover bg-center h-[500px] grid grid-cols-12 items-center px-4"
-                style={{
-                  backgroundImage: `url('${item.thumbnailImage}')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              >
+              <div className="relative">
+                <ResponsiveImage
+                  src={item.thumbnailImage || '/placeholder.svg'}
+                  alt={item.title || 'Hero banner'}
+                  aspectRatio="21/9"
+                  objectFit="cover"
+                  className="w-full"
+                />
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black/20"></div>
 
                 {/* Button only for the first item */}
-                {index === 0 && (
+                {/* {index === 0 && (
                   <div className="absolute top-[64%] left-[28%] transform -translate-x-1/2 z-20">
                     <Button className="bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-4xl w-48">
                       Khám phá
                     </Button>
                   </div>
-                )}
-              </section>
+                )} */}
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>

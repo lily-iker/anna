@@ -58,7 +58,7 @@ instance.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    // Check for 403 status or network error that might be due to expired token
+    // Check for 401 status or network error that might be due to expired token
     const isAuthError = error.response && error.response.status === 401 && !originalRequest._retry
 
     if (!isAuthError) {

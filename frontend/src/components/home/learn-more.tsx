@@ -1,15 +1,14 @@
 import { memo } from 'react'
+import ResponsiveImage from './responsive-image'
 
 function LearnMore() {
   return (
-    <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-md">
-      {/* Background image with loading optimization */}
-      <img
+    <div className="relative w-full rounded-2xl overflow-hidden shadow-md">
+      <ResponsiveImage
         src="https://res.cloudinary.com/dnvyuomtd/image/upload/v1742787800/bannerblog2_qjoqhn_uvzqab.jpg"
         alt="Anna Shop Banner"
-        className="w-full h-full object-cover"
-        loading="lazy" // Add lazy loading
-        decoding="async" // Add async decoding
+        aspectRatio="21/9"
+        objectFit="cover"
       />
 
       {/* Floating card */}
@@ -21,8 +20,8 @@ function LearnMore() {
           <img
             src="https://res.cloudinary.com/dr4kiyshe/image/upload/v1742799702/zalo-icon_utkta5.png"
             className="s-3 sm:s-4"
-            loading="lazy" // Add lazy loading
-            width="24" // Add explicit dimensions
+            loading="lazy"
+            width="24"
             height="24"
             alt="Zalo"
           />

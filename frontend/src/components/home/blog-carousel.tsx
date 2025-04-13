@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, memo } from 'react'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
 import { Link } from 'react-router-dom'
 import type { Blog } from '@/types'
+import ResponsiveImage from './responsive-image'
 
 interface BlogCarouselProps {
   items: Blog[]
@@ -12,17 +13,16 @@ interface BlogCarouselProps {
 // Create a memoized blog item component
 const BlogItem = memo(({ item }: { item: Blog }) => (
   <Link to="#" className="group block">
-    <div className="relative h-64 overflow-hidden rounded-lg">
-      <img
+    <div className="relative rounded-lg overflow-hidden">
+      <ResponsiveImage
         src={
           item.thumbnailImage ||
           'https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg' ||
           '/placeholder.svg'
         }
         alt={item.title}
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        loading="lazy" // Add lazy loading
-        decoding="async" // Add async decoding
+        aspectRatio="4/3"
+        className="w-full group-hover:scale-105 transition-transform duration-300"
       />
       <div className="absolute inset-0 bg-black/30 flex items-end p-4">
         <h3 className="text-white font-medium">{item.title}</h3>

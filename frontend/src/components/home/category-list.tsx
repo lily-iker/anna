@@ -4,6 +4,7 @@ import { memo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 import type { Category } from '@/types'
+import ResponsiveImage from './responsive-image'
 
 interface CategoryListProps {
   items: Category[]
@@ -14,13 +15,12 @@ const CategoryItem = memo(({ item, onClick }: { item: Category; onClick: () => v
   <div className="block transition-transform duration-300 hover:scale-[1.02]" onClick={onClick}>
     <Card className="border-0 shadow-none overflow-hidden hover:cursor-pointer">
       <CardContent className="p-0">
-        <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden">
-          <img
+        <div className="relative rounded-lg overflow-hidden">
+          <ResponsiveImage
             src={item.thumbnailImage || '/placeholder.svg?height=300&width=400'}
             alt={item.name}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy" // Add lazy loading
-            decoding="async" // Add async decoding
+            aspectRatio="16/9"
+            objectFit="cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
             <h3 className="text-white text-lg font-medium p-4">{item.name}</h3>

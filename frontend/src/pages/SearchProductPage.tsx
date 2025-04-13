@@ -2,15 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Slider } from '@/components/ui/slider'
-import { Filter, Search, X } from 'lucide-react'
-import { formatCurrency } from '@/lib/format'
 import { Pagination } from '@/components/ui/pagination'
 import useProductStore from '@/stores/useProductStore'
 import useCategoryStore from '@/stores/useCategoryStore'
 import ProductCard from '@/components/product-card'
+import ProductFilter from '@/components/product-filter'
 import {
   Select,
   SelectContent,
@@ -35,29 +33,22 @@ export default function SearchProductPage() {
     setSearchFilters,
   } = useProductStore()
 
-  const { categories, fetchCategories } = useCategoryStore()
+  const { fetchCategories } = useCategoryStore()
 
   // Local state for form inputs
   const [searchTerm, setSearchTerm] = useState(queryParams.get('q') || '')
-  const [priceRange, setPriceRange] = useState([
+  const [priceRange, setPriceRange] = useState<[number, number]>([
     Number(queryParams.get('minPrice') || 0),
-    Number(queryParams.get('maxPrice') || 800000),
+    Number(queryParams.get('maxPrice') || 10000000),
   ])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     queryParams.get('category')
   )
-  const [showFilters, setShowFilters] = useState(false)
-
-  // Local state for pagination to ensure smooth UI updates
+  const [tableLoading, setTableLoading] = useState(false)
   const [localPageSize, setLocalPageSize] = useState(pageSize)
 
   // Pagination state
   const [pageSizeOptions] = useState([10, 12, 16, 24])
-
-  useEffect(() => {
-    // Scroll to the top of the page when the component is mounted
-    window.scrollTo(0, 0)
-  }, [])
 
   // Fetch categories on mount
   useEffect(() => {
@@ -69,7 +60,7 @@ export default function SearchProductPage() {
     const initialSearch = queryParams.get('q') || ''
     const initialCategory = queryParams.get('category') || null
     const minPrice = Number(queryParams.get('minPrice') || 0)
-    const maxPrice = Number(queryParams.get('maxPrice') || 800000)
+    const maxPrice = Number(queryParams.get('maxPrice') || 10000000)
     const page = Number(queryParams.get('page') || 1)
     const size = Number(queryParams.get('size') || pageSize)
 
@@ -89,13 +80,21 @@ export default function SearchProductPage() {
     })
   }, [location.search, fetchProducts, setSearchFilters, pageSize])
 
-  // Sync local page size with store page size
+  // Update table loading state when isLoading changes
   useEffect(() => {
-    setLocalPageSize(pageSize)
-  }, [pageSize])
+    if (!isLoading) {
+      // Add a small delay to make transitions smoother
+      const timer = setTimeout(() => {
+        setTableLoading(false)
+      }, 300)
+      return () => clearTimeout(timer)
+    } else {
+      setTableLoading(true)
+    }
+  }, [isLoading])
 
-  // Handle search and filter submission
-  const handleSearch = () => {
+  // Apply filters
+  const handleApplyFilters = () => {
     // Update URL with search params
     const params = new URLSearchParams()
     if (searchTerm) params.set('q', searchTerm)
@@ -120,18 +119,18 @@ export default function SearchProductPage() {
   // Reset filters
   const handleResetFilters = () => {
     setSearchTerm('')
-    setPriceRange([0, 800000])
+    setPriceRange([0, 10000000]) // Reset to "Tất cả khoảng giá"
     setSelectedCategory(null)
 
     navigate(`/search?size=${localPageSize}`)
 
-    setSearchFilters('', 0, 800000, null)
+    setSearchFilters('', 0, 10000000, null)
     fetchProducts({
       page: 1,
       size: localPageSize,
       name: '',
       minPrice: 0,
-      maxPrice: 800000,
+      maxPrice: 10000000,
       categoryName: '',
     })
   }
@@ -139,6 +138,8 @@ export default function SearchProductPage() {
   const handlePageChange = useCallback(
     (page: number) => {
       if (page !== currentPage) {
+        setTableLoading(true)
+
         // Update URL with page param
         const params = new URLSearchParams(location.search)
         params.set('page', page.toString())
@@ -151,14 +152,18 @@ export default function SearchProductPage() {
   )
 
   const handlePageSizeChange = (size: string) => {
+    // Convert size to number immediately
     const sizeNum = Number.parseInt(size)
-    setLocalPageSize(sizeNum) // Update local state immediately for UI
+    setLocalPageSize(sizeNum)
 
     // Update URL with size param
     const params = new URLSearchParams(location.search)
     params.set('size', size)
-    navigate(`/search?${params.toString()}`)
 
+    // Set loading state
+    setTableLoading(true)
+
+    // Fetch products with the new size
     fetchProducts({
       page: 1,
       size: sizeNum,
@@ -167,95 +172,42 @@ export default function SearchProductPage() {
       maxPrice: priceRange[1],
       categoryName: selectedCategory || undefined,
     })
+
+    // Update URL after fetching to avoid race conditions
+    navigate(`/search?${params.toString()}`)
   }
 
+  // Effect to apply filters when URL changes
+  useEffect(() => {
+    // Check if filters have changed
+    const urlSearchTerm = queryParams.get('q') || ''
+    const urlCategory = queryParams.get('category') || null
+    const urlMinPrice = Number(queryParams.get('minPrice') || 0)
+    const urlMaxPrice = Number(queryParams.get('maxPrice') || 10000000)
+
+    if (
+      urlSearchTerm !== searchTerm ||
+      urlCategory !== selectedCategory ||
+      urlMinPrice !== priceRange[0] ||
+      urlMaxPrice !== priceRange[1]
+    ) {
+      handleApplyFilters()
+    }
+  }, [searchTerm, selectedCategory, priceRange])
+
   return (
-    <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
-      <h1 className="text-2xl font-bold text-center mb-8">SẢN PHẨM</h1>
+    <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 pb-8 pt-24">
+      <h1 className="text-2xl font-bold text-green-600 text-center mb-6">SẢN PHẨM</h1>
 
-      {/* Search and Filters */}
-      <div className="space-y-4 bg-white p-4 rounded-md border">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Input
-              placeholder="Tìm kiếm tên sản phẩm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            <div className="absolute left-3 top-2.5 text-gray-400">
-              <Search className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleSearch} disabled={isLoading}>
-              Tìm kiếm
-            </Button>
-
-            <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
-              <Filter className="h-4 w-4 mr-1" />
-              {showFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
-            </Button>
-
-            <Button
-              variant="ghost"
-              onClick={handleResetFilters}
-              className="text-gray-500"
-              disabled={isLoading}
-            >
-              <X className="h-4 w-4 mr-1" />
-              Xóa lọc
-            </Button>
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className="pt-4 border-t">
-            <div className="space-y-6 md:space-y-0 md:flex md:items-top md:gap-8">
-              {/* Category Filter */}
-              <div className="flex-1">
-                <h3 className="text-sm font-medium mb-2">Danh mục</h3>
-                <Select
-                  value={selectedCategory || 'all'}
-                  onValueChange={(value) => setSelectedCategory(value === 'all' ? null : value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Tất cả danh mục" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả danh mục</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.name}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Price Range Filter */}
-              <div className="flex-1">
-                <h3 className="text-sm font-medium mb-2">Khoảng giá</h3>
-                <div className="px-2">
-                  <Slider
-                    value={priceRange}
-                    min={0}
-                    max={1000000}
-                    step={10000}
-                    onValueChange={setPriceRange}
-                    className="my-6"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>{formatCurrency(priceRange[0])}</span>
-                    <span>{formatCurrency(priceRange[1])}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Simplified Filters */}
+      <ProductFilter
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        onResetFilters={handleResetFilters}
+        isLoading={isLoading}
+      />
 
       {/* Results per page selector */}
       <div className="flex justify-between items-center mt-4 mb-4">
@@ -265,9 +217,14 @@ export default function SearchProductPage() {
 
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-500">Hiển thị:</span>
-          <Select value={localPageSize.toString()} onValueChange={handlePageSizeChange}>
+          <Select
+            defaultValue={pageSize.toString()}
+            value={pageSize.toString()}
+            onValueChange={handlePageSizeChange}
+            disabled={isLoading}
+          >
             <SelectTrigger className="w-[80px]">
-              <SelectValue placeholder={localPageSize.toString()} />
+              <SelectValue>{pageSize}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((size) => (
@@ -281,13 +238,22 @@ export default function SearchProductPage() {
       </div>
 
       {/* Products Grid with loading state */}
-      <div className="relative">
-        {products.length === 0 ? (
+      <div className="relative border rounded-md">
+        {tableLoading && (
+          <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 backdrop-blur-[1px]">
+            <div className="flex flex-col items-center">
+              <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
+              <span className="mt-2 text-sm text-gray-600">Đang tải...</span>
+            </div>
+          </div>
+        )}
+
+        {products.length === 0 && !tableLoading ? (
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">
               Không tìm thấy sản phẩm nào phù hợp với tiêu chí tìm kiếm
             </p>
-            {(searchTerm || selectedCategory || priceRange[0] > 0 || priceRange[1] < 800000) && (
+            {(searchTerm || selectedCategory || priceRange[0] > 0 || priceRange[1] < 10000000) && (
               <Button variant="outline" onClick={handleResetFilters} className="mt-2">
                 Xóa bộ lọc
               </Button>

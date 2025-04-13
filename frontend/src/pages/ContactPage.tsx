@@ -8,7 +8,7 @@ export default function ContactPage() {
   const storeAddress = '121 Phan Đình Giót - La Khê - Hà Đông'
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="container mx-auto px-4 pb-8 pt-24 max-w-5xl">
       <h1 className="text-center text-2xl font-semibold text-green-500 mb-6">LIÊN HỆ</h1>
 
       {/* Map component */}

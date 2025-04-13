@@ -2,15 +2,26 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Minus, Plus, ChevronDown } from 'lucide-react'
+import { Minus, Plus, ChevronDown, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatCurrency } from '@/lib/format'
 import useCartStore from '@/stores/useCartStore'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, clearCart, getSubtotal } = useCartStore()
+  const {
+    items,
+    cartItems,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    getSubtotal,
+    fetchCartItems,
+    isLoading,
+    error,
+  } = useCartStore()
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [isAllSelected, setIsAllSelected] = useState(false)
   const [deliveryDate, setDeliveryDate] = useState(
@@ -19,6 +30,11 @@ export default function CartPage() {
   const [deliveryTime, setDeliveryTime] = useState('8:00 - 10:00')
   const [showDatePopover, setShowDatePopover] = useState(false)
   const [showTimePopover, setShowTimePopover] = useState(false)
+
+  // Fetch product details when component mounts
+  useEffect(() => {
+    fetchCartItems()
+  }, [fetchCartItems])
 
   // Initialize selected items with all items
   useEffect(() => {
@@ -80,22 +96,56 @@ export default function CartPage() {
     '19:00 - 21:00',
   ]
 
-  //   if (items.length === 0) {
-  //     return (
-  //       <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
-  //         <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
-  //         <div className="bg-white rounded-lg shadow p-24 text-center">
-  //           <p className="text-gray-600 mb-4">Giỏ hàng của bạn đang trống</p>
-  //           <Button asChild className="bg-green-600 hover:bg-green-700">
-  //             <Link to="/search">Tiếp tục mua sắm</Link>
-  //           </Button>
-  //         </div>
-  //       </div>
-  //     )
-  //   }
+  // Empty cart state
+  if (cartItems.length === 0) {
+    return (
+      <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
+        <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
+        <div className="bg-white rounded-lg shadow p-24 text-center">
+          <p className="text-gray-600 mb-4">Giỏ hàng của bạn đang trống</p>
+          <Button asChild className="bg-green-600 hover:bg-green-700">
+            <Link to="/search">Tiếp tục mua sắm</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
+        <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
+        <div className="bg-white rounded-lg shadow p-24 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-green-600" />
+          <p className="text-gray-600">Đang tải thông tin giỏ hàng...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
+        <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <div className="flex justify-center">
+          <Button onClick={() => fetchCartItems()} className="mr-2">
+            Thử lại
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/search">Tiếp tục mua sắm</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
+    <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 pb-8 pt-24">
       <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
@@ -111,7 +161,7 @@ export default function CartPage() {
                     </th>
                     <th className="py-3 px-4 text-left">Sản phẩm</th>
                     <th className="py-3 px-4 text-left">Giá</th>
-                    <th className="py-3 px-4 text-left">Số lượng(kg/set)</th>
+                    <th className="py-3 px-4 text-left">Số lượng({items[0]?.unit || 'kg/set'})</th>
                     <th className="py-3 px-4 text-left">Tạm tính</th>
                     <th className="py-3 px-4 text-left">Thao tác</th>
                   </tr>
@@ -183,10 +233,10 @@ export default function CartPage() {
               variant="outline"
               className="bg-green-600 text-white hover:bg-green-700"
             >
-              <Link to="/search">Quay về trang chủ</Link>
+              <Link to="/">Quay về trang chủ</Link>
             </Button>
             <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700">
-              Tiếp tục mua hàng
+              <Link to="/search">Tiếp tục mua hàng</Link>
             </Button>
           </div>
         </div>
@@ -200,7 +250,6 @@ export default function CartPage() {
               <h3 className="font-medium mb-3">Thời gian giao hàng</h3>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* <div className="space-y-4 mb-4"> */}
                 <div>
                   <label className="block text-sm mb-1">Ngày giao</label>
                   <Popover open={showDatePopover} onOpenChange={setShowDatePopover}>
@@ -219,7 +268,7 @@ export default function CartPage() {
                           <div
                             key={date}
                             className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                              date === deliveryDate ? 'bg-orange-100' : ''
+                              date === deliveryDate ? 'bg-[#9DE25C]' : ''
                             }`}
                             onClick={() => {
                               setDeliveryDate(date)
@@ -252,7 +301,7 @@ export default function CartPage() {
                           <div
                             key={time}
                             className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                              time === deliveryTime ? 'bg-orange-100' : ''
+                              time === deliveryTime ? 'bg-[#9DE25C]' : ''
                             }`}
                             onClick={() => {
                               setDeliveryTime(time)
