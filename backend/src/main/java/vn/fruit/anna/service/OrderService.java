@@ -6,9 +6,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.fruit.anna.dto.filter.OrderFilter;
+import vn.fruit.anna.dto.request.ListOrdersByIdsRequest;
 import vn.fruit.anna.dto.response.OrderItemResponse;
 import vn.fruit.anna.dto.response.OrderResponse;
+import vn.fruit.anna.enums.OrderStatus;
 import vn.fruit.anna.model.Order;
 import vn.fruit.anna.model.OrderItem;
 import vn.fruit.anna.repository.OrderRepository;
@@ -34,6 +37,26 @@ public class OrderService {
         Pageable pageable = PageRequest.of(page, size);
         Specification<Order> spec = OrderSpecification.applyFilter(filter);
         return orderRepository.findAll(spec, pageable).map(this::toResponse);
+    }
+
+    @Transactional
+    public OrderResponse updateStatus(UUID orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
+
+        order.setStatus(newStatus);
+        return toResponse(order);
+    }
+
+    @Transactional
+    public void deleteOrdersByIds(ListOrdersByIdsRequest request) {
+        List<UUID> orderIds = request.getOrderIds();
+
+        List<Order> orders = orderRepository.findAllById(orderIds);
+
+        if (!orders.isEmpty()) {
+            orderRepository.deleteAll(orders);
+        }
     }
 
     private OrderResponse toResponse(Order order) {

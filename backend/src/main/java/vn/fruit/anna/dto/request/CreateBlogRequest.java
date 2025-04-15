@@ -11,8 +11,6 @@ public class CreateBlogRequest {
     @NotBlank(message = "Title cannot be blank!")
     private String title;
 
-    private String thumbnailImage;
-
     @NotBlank(message = "Sapo cannot be blank!")
     private String sapo;
 

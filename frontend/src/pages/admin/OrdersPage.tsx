@@ -66,7 +66,7 @@ export default function OrderPage() {
     isLoading,
     fetchOrders,
     setSearchFilters,
-    deleteMultipleOrders,
+    deleteOrders,
   } = useOrderStore()
 
   // Local state for form inputs
@@ -132,7 +132,7 @@ export default function OrderPage() {
 
   const handleDeleteSelected = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa các đơn hàng đã chọn?')) {
-      await deleteMultipleOrders(selectedOrders)
+      await deleteOrders(selectedOrders)
       setSelectedOrders([])
     }
   }
@@ -141,7 +141,7 @@ export default function OrderPage() {
     setSelectedStatus(status)
     fetchOrders({
       page: 1,
-      status: status === 'all' ? undefined : status,
+      status: status === 'all' || status === null ? undefined : status,
       customerName: searchCustomer,
     })
   }

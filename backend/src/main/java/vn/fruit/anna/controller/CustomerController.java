@@ -20,7 +20,9 @@ public class CustomerController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Get customers successfully", customerService.searchCustomers(name, page, size))
+                new ApiResponse<>(200,
+                        "Get customers successfully",
+                        customerService.searchCustomers(name, page, size))
         );
     }
 }

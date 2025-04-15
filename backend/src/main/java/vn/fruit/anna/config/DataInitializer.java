@@ -531,8 +531,6 @@ public class DataInitializer {
             int numberOfItems = 1 + random.nextInt(3); // 1 to 3 products per order
             double total = 0.0;
 
-            List<OrderItem> orderItems = new ArrayList<>();
-
             for (int j = 0; j < numberOfItems; j++) {
                 Product product = products.get(random.nextInt(products.size()));
                 int quantity = 1 + random.nextInt(5); // 1 to 5 units
@@ -545,10 +543,9 @@ public class DataInitializer {
                         .build();
 
                 total += item.getPrice() * item.getQuantity();
-                orderItems.add(item);
+                order.getOrderItems().add(item);
             }
 
-            orderItemRepository.saveAll(orderItems);
             order.setTotalPrice(total);
             orderRepository.save(order);
         }

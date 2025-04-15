@@ -10,7 +10,7 @@ const AdminSidebar = () => {
     <>
       <div className="p-4 border-b flex items-center space-x-2">
         <Home className="size-6 text-gray-500" />
-        <h1 className="text-l font-semibold">Trang quản lý cửa hàng</h1>
+        <h1 className="text-lg font-semibold">Trang quản lý cửa hàng</h1>
       </div>
       <nav className="p-4 space-y-2">
         <Link

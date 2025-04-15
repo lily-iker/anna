@@ -115,7 +115,7 @@ public class ProductService {
                 .toList();
     }
 
-    // Method to delete multiple products by their IDs
+    @Transactional
     public void deleteProductsByIds(ListProductsByIdsRequest request) {
         List<UUID> productIds = request.getProductIds();
 

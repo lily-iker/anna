@@ -12,10 +12,18 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Edit, Search } from 'lucide-react'
+import { formatDate } from '@/lib/format'
 import { Pagination } from '@/components/ui/pagination'
 import useBlogStore from '@/stores/useBlogStore'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
-export default function BlogPage() {
+export default function BlogsPage() {
   const navigate = useNavigate()
   const {
     blogs,
@@ -24,41 +32,42 @@ export default function BlogPage() {
     currentPage,
     pageSize,
     isLoading,
-    error,
     fetchBlogs,
-    deleteMultipleBlogs,
+    deleteBlogs,
+    setSearchTitle,
   } = useBlogStore()
 
+  // Local state for form inputs
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedBlogs, setSelectedBlogs] = useState<number[]>([])
-  const [pageSizeOptions] = useState([5, 10, 20, 50])
+  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([])
 
-  // Initial data fetch
+  // Pagination state
+  const [pageSizeOptions] = useState([1, 5, 10, 20])
+
   useEffect(() => {
     fetchBlogs()
   }, [fetchBlogs])
 
-  // Handle search
+  // Handle search and filter submission
   const handleSearch = () => {
-    fetchBlogs({ page: 1, title: searchTerm })
+    setSearchTitle(searchTerm)
+    fetchBlogs(1, pageSize, searchTerm)
   }
 
-  // Handle page change
   const handlePageChange = useCallback(
     (page: number) => {
+      // Only fetch if the requested page is different from the current page
       if (page !== currentPage) {
-        fetchBlogs({ page })
+        fetchBlogs(page, pageSize)
       }
     },
-    [currentPage, fetchBlogs]
+    [currentPage, pageSize, fetchBlogs]
   )
 
-  // Handle page size change
   const handlePageSizeChange = (size: string) => {
-    fetchBlogs({ page: 1, size: Number.parseInt(size) })
+    fetchBlogs(1, Number.parseInt(size))
   }
 
-  // Handle select all
   const handleSelectAll = () => {
     if (selectedBlogs.length === blogs.length) {
       setSelectedBlogs([])
@@ -67,8 +76,7 @@ export default function BlogPage() {
     }
   }
 
-  // Handle select blog
-  const handleSelectBlog = (id: number) => {
+  const handleSelectBlog = (id: string) => {
     if (selectedBlogs.includes(id)) {
       setSelectedBlogs(selectedBlogs.filter((blogId) => blogId !== id))
     } else {
@@ -76,10 +84,9 @@ export default function BlogPage() {
     }
   }
 
-  // Handle delete selected
   const handleDeleteSelected = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa các bài viết đã chọn?')) {
-      await deleteMultipleBlogs(selectedBlogs)
+      await deleteBlogs(selectedBlogs)
       setSelectedBlogs([])
     }
   }
@@ -87,7 +94,7 @@ export default function BlogPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Blog</h1>
+        <h1 className="text-2xl font-bold">Bài viết</h1>
         <div className="flex space-x-2">
           <Button
             variant="destructive"
@@ -96,26 +103,7 @@ export default function BlogPage() {
           >
             Xóa bài viết
           </Button>
-          <Button onClick={() => navigate('/admin/blog/add')}>Thêm bài viết</Button>
-        </div>
-      </div>
-
-      {/* Search */}
-      <div className="space-y-4 bg-white p-4 rounded-md border">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Input
-              placeholder="Tìm kiếm tên bài blog"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            <div className="absolute left-3 top-2.5 text-gray-400">
-              <Search className="h-5 w-5" />
-            </div>
-          </div>
-
-          <Button onClick={handleSearch}>Tìm kiếm</Button>
+          <Button onClick={() => navigate('/admin/blogs/add')}>Thêm bài viết</Button>
         </div>
       </div>
 
@@ -127,75 +115,102 @@ export default function BlogPage() {
 
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-500">Hiển thị:</span>
-          <select
-            value={pageSize}
-            onChange={(e) => handlePageSizeChange(e.target.value)}
-            className="border rounded p-1 text-sm"
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+          <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+            <SelectTrigger className="w-[80px]">
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent>
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Blogs Table */}
       <div className="border rounded-md relative">
-        {isLoading ? (
-          <div className="text-center py-4">Đang tải...</div>
-        ) : error ? (
-          <div className="text-center py-4 text-red-500">{error}</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selectedBlogs.length === blogs.length && blogs.length > 0}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
-                <TableHead>Tên blog</TableHead>
-                <TableHead>Tác giả</TableHead>
-                <TableHead className="w-16"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {blogs.map((blog) => (
-                <TableRow key={blog.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedBlogs.includes(blog.id)}
-                      onCheckedChange={() => handleSelectBlog(blog.id)}
-                    />
-                  </TableCell>
-                  <TableCell>{blog.title}</TableCell>
-                  <TableCell>{blog.author}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigate(`/admin/blog/edit/${blog.id}`)}
-                      className="hover:cursor-pointer"
-                    >
-                      <Edit className="h-4 w-4 text-orange-500" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+        {/* Search */}
+        <div className="p-4 flex justify-end">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3 text-gray-400 h-5 w-5" />
+            <Input
+              placeholder="Tìm kiếm bài viết"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch()
+                }
+              }}
+              className="pl-10 w-full"
+            />
+          </div>
+        </div>
 
-              {blogs.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">
-                    Không tìm thấy bài viết nào
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
+        <div className="border border-gray-200"></div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={selectedBlogs.length === blogs.length && blogs.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
+              <TableHead className="w-16">Ảnh</TableHead>
+              <TableHead>Tiêu đề</TableHead>
+              <TableHead>Tác giả</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead className="w-16"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {blogs.map((blog) => (
+              <TableRow key={blog.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedBlogs.includes(blog.id)}
+                    onCheckedChange={() => handleSelectBlog(blog.id)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className="h-10 w-10 rounded overflow-hidden">
+                    <img
+                      src={blog.thumbnailImage || '/placeholder.svg?height=40&width=40'}
+                      alt={blog.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </TableCell>
+                <TableCell>{blog.title}</TableCell>
+                <TableCell>{blog.author}</TableCell>
+                <TableCell>{formatDate(blog.createdAt || '')}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate(`/admin/blogs/edit/${blog.id}`)}
+                    className="hover:cursor-pointer"
+                  >
+                    <Edit className="h-4 w-4 text-orange-500" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {blogs.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4">
+                  Không tìm thấy bài viết nào
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination */}

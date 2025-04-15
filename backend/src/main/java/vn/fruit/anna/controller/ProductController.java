@@ -91,7 +91,8 @@ public class ProductController {
     public ResponseEntity<?> deleteProductsByIds(@RequestBody ListProductsByIdsRequest request) {
         productService.deleteProductsByIds(request);
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Products deleted successfully", null)
+                new ApiResponse<>(200,
+                        "Products deleted successfully")
         );
     }
 

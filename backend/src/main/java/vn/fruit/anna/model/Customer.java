@@ -4,6 +4,7 @@ import jakarta.persistence.GenerationType;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@BatchSize(size = 20)
 public class Customer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

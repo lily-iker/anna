@@ -2,6 +2,7 @@ package vn.fruit.anna.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import vn.fruit.anna.enums.OrderStatus;
 
@@ -32,7 +33,9 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne

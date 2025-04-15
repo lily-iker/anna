@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import axios from '@/lib/axios-custom'
 import { toast } from 'react-hot-toast'
 import { OrderPaginationParams } from '@/types/pagination'
-import { ApiResponse, Order } from '@/types'
+import { ApiResponse, Order, OrderStatus } from '@/types'
 
 interface OrderStoreState {
   isLoading: boolean
@@ -31,9 +31,8 @@ interface OrderStoreState {
 
   fetchOrderById: (orderId: string) => Promise<Order | null>
   fetchOrders: (params?: Partial<OrderPaginationParams>) => Promise<void>
-  updateOrder: (id: string, orderData: Partial<Order>) => Promise<Order | null>
-  deleteOrder: (id: string) => Promise<void>
-  deleteMultipleOrders: (ids: string[]) => Promise<void>
+  updateOrderStatus: (orderId: string, newStatus: OrderStatus) => Promise<void>
+  deleteOrders: (ids: string[]) => Promise<void>
 }
 
 const useOrderStore = create<OrderStoreState>((set, get) => ({
@@ -118,62 +117,48 @@ const useOrderStore = create<OrderStoreState>((set, get) => ({
     }
   },
 
-  updateOrder: async (id: string, orderData: Partial<Order>) => {
+  updateOrderStatus: async (orderId: string, newStatus: OrderStatus) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await axios.put(`/api/order/${id}`, orderData)
+      const res = await axios.put(`/api/order/${orderId}/status`, {
+        newStatus,
+      })
 
+      const updatedOrder: Order = res.data.result
+
+      // Update the current order if it's the one we just updated
       set((state) => ({
-        orders: state.orders.map((o) => (o.id === id ? response.data.result : o)),
+        orders: state.orders.map((order) => (order.id === orderId ? updatedOrder : order)),
+        currentOrder: state.currentOrder?.id === orderId ? updatedOrder : state.currentOrder,
         isLoading: false,
       }))
 
-      toast.success('Cập nhật đơn hàng thành công!')
-      return response.data.result
+      toast.success('Cập nhật trạng thái đơn hàng thành công!')
     } catch (error: any) {
-      console.error('Error updating order:', error)
+      console.error('Error updating order status:', error)
       toast.error(
-        'Cập nhật đơn hàng thất bại: ' + error.response?.data?.message || 'Lỗi không xác định'
+        'Cập nhật trạng thái thất bại: ' + (error.response?.data?.message || 'Lỗi không xác định')
       )
-      set({ isLoading: false, error: 'Failed to update order.' })
-      return null
+      set({ isLoading: false, error: 'Failed to update order status.' })
     }
   },
 
-  deleteOrder: async (id: string) => {
+  deleteOrders: async (ids: string[]) => {
     set({ isLoading: true, error: null })
     try {
-      await axios.delete(`/api/order/${id}`)
-
-      set((state) => ({
-        orders: state.orders.filter((o) => o.id !== id),
-        isLoading: false,
-      }))
-
-      toast.success('Xóa đơn hàng thành công!')
-    } catch (error: any) {
-      console.error('Error deleting order:', error)
-      toast.error('Xóa đơn hàng thất bại: ' + error.response?.data?.message || 'Lỗi không xác định')
-      set({ isLoading: false, error: 'Failed to delete order.' })
-    }
-  },
-
-  deleteMultipleOrders: async (ids: string[]) => {
-    set({ isLoading: true, error: null })
-    try {
-      await axios.delete('/api/order/delete-multiple', { data: { ids } })
+      await axios.delete('/api/order/delete-by-ids', {
+        data: { orderIds: ids },
+      })
 
       set((state) => ({
         orders: state.orders.filter((o) => !ids.includes(o.id)),
         isLoading: false,
       }))
 
-      toast.success('Xóa các đơn hàng đã chọn thành công!')
+      toast.success('Xóa đơn hàng đã chọn thành công!')
     } catch (error: any) {
       console.error('Error deleting multiple orders:', error)
-      toast.error(
-        'Xóa các đơn hàng thất bại: ' + error.response?.data?.message || 'Lỗi không xác định'
-      )
+      toast.error('Xóa đơn hàng thất bại: ' + error.response?.data?.message || 'Lỗi không xác định')
       set({ isLoading: false, error: 'Failed to delete orders.' })
     }
   },

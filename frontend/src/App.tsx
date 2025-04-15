@@ -6,6 +6,9 @@ import { useAuthStore } from './stores/useAuthStore'
 import ContactPage from './pages/ContactPage'
 import CartPage from './pages/CartPage'
 import EditOrderPage from './pages/admin/EditOrderPage'
+import AddBlogPage from './pages/admin/AddBlogPage'
+import EditBlogPage from './pages/admin/EditBlogPage'
+import CategoryImagePage from './pages/admin/CategoryImagePage'
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -21,7 +24,6 @@ const AddProductPage = lazy(() => import('./pages/admin/AddProductPage'))
 const CustomersPage = lazy(() => import('./pages/admin/CustomersPage'))
 const BannerPage = lazy(() => import('./pages/admin/BannerPage'))
 const FeedbackPage = lazy(() => import('./pages/admin/FeedbackPage'))
-const CategoryPage = lazy(() => import('./pages/admin/CategoryPage'))
 
 function App() {
   const { authUser, fetchAuthUser } = useAuthStore()
@@ -61,13 +63,21 @@ function App() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/add" element={<AddProductPage />} />
         <Route path="products/edit/:id" element={<EditProductPage />} />
+
         <Route path="orders" element={<OrdersPage />} />
         <Route path="orders/edit/:id" element={<EditOrderPage />} />
+
         <Route path="blogs" element={<BlogsPage />} />
+        <Route path="blogs/add" element={<AddBlogPage />} />
+        <Route path="blogs/edit/:id" element={<EditBlogPage />} />
+
         <Route path="customers" element={<CustomersPage />} />
+
         <Route path="banners" element={<BannerPage />} />
+
         <Route path="feedbacks" element={<FeedbackPage />} />
-        <Route path="category-images" element={<CategoryPage />} />
+
+        <Route path="category-images" element={<CategoryImagePage />} />
       </Route>
     </Routes>
   )

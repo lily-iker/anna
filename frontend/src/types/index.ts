@@ -41,12 +41,13 @@ export interface Banner {
 }
 
 export interface Blog {
-  id: number
+  id: string
   title: string
   thumbnailImage: string
   sapo: string
   content: string
   author: string
+  createdAt: string
 }
 
 export type Customer = {
@@ -72,8 +73,10 @@ export interface Order {
   estimatedDeliveryDate: string
   note: string
   totalPrice: number
-  status: 'NEW' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
+  status: OrderStatus
   customerName: string
   createdAt: string
   items: OrderItem[]
 }
+
+export type OrderStatus = 'NEW' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
