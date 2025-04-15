@@ -9,11 +9,11 @@ export default function AdminLayout() {
   const { authUser, isLoading } = useAuthStore()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!isLoading && authUser?.role !== 'ADMIN') {
-      navigate('/login')
-    }
-  }, [authUser, isLoading, navigate])
+  // useEffect(() => {
+  //   if (!isLoading && authUser?.role !== 'ADMIN') {
+  //     navigate('/login')
+  //   }
+  // }, [authUser, isLoading, navigate])
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 

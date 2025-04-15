@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import {
 import useProductStore from '@/stores/useProductStore'
 import useCategoryStore from '@/stores/useCategoryStore'
 import toast from 'react-hot-toast'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 export default function AddProductPage() {
   const navigate = useNavigate()
@@ -93,7 +93,7 @@ export default function AddProductPage() {
     })
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
     // Add validation for stock and minUnitToOrder
@@ -114,6 +114,13 @@ export default function AddProductPage() {
         name === 'discountPercentage'
           ? Number.parseFloat(value) || 0
           : value,
+    }))
+  }
+
+  const handleDescriptionChange = (html: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: html,
     }))
   }
 
@@ -278,14 +285,10 @@ export default function AddProductPage() {
               <Label htmlFor="description" className="text-sm font-medium">
                 Mô tả sản phẩm <span className="text-red-500">*</span>
               </Label>
-              <Textarea
-                id="description"
-                name="description"
+              <RichTextEditor
                 value={formData.description}
-                onChange={handleChange}
-                rows={5}
-                className="mt-1 h-30"
-                required
+                onChange={handleDescriptionChange}
+                className="mt-1"
               />
             </div>
 

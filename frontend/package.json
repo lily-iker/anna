@@ -20,6 +20,7 @@
     "@radix-ui/react-tabs": "^1.1.4",
     "@tailwindcss/vite": "^4.0.14",
     "@tiptap/core": "^2.11.7",
+    "@tiptap/extension-text-align": "^2.11.7",
     "@tiptap/pm": "^2.11.7",
     "@tiptap/react": "^2.11.7",
     "@tiptap/starter-kit": "^2.11.7",
