@@ -112,22 +112,22 @@ export default function CartPage() {
   }
 
   // Loading state
-  if (isLoading) {
-    return (
-      <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
-        <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
-        <div className="bg-white rounded-lg shadow p-24 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-green-600" />
-          <p className="text-gray-600">Đang tải thông tin giỏ hàng...</p>
-        </div>
-      </div>
-    )
-  }
+  //   if (isLoading) {
+  //     return (
+  //       <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
+  //         <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
+  //         <div className="bg-white rounded-lg shadow p-24 text-center">
+  //           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-green-600" />
+  //           <p className="text-gray-600">Đang tải thông tin giỏ hàng...</p>
+  //         </div>
+  //       </div>
+  //     )
+  //   }
 
   // Error state
   if (error) {
     return (
-      <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
+      <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 pb-8 pt-24">
         <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>

@@ -1,4 +1,3 @@
-// Custom Spring Boot pagination response interface matching your backend
 export interface Page<T> {
   content: T[]
   page: {
@@ -18,5 +17,15 @@ export interface ProductPaginationParams {
   minPrice?: number
   maxPrice?: number
   categoryName?: string
+  sort?: string
+}
+
+export interface OrderPaginationParams {
+  page: number
+  size: number
+  status?: string
+  customerName?: string
+  fromDate?: string
+  toDate?: string
   sort?: string
 }

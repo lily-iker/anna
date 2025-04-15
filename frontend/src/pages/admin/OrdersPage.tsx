@@ -1,6 +1,4 @@
-'use client'
-
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Table,
@@ -11,155 +9,301 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { Pencil } from 'lucide-react'
-import { formatCurrency } from '@/lib/format'
+import { Search, Edit } from 'lucide-react'
+import { formatCurrency, formatDate } from '@/lib/format'
+import { Pagination } from '@/components/ui/pagination'
+import useOrderStore from '@/stores/useOrderStore'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
-export default function OrdersPage() {
+// Helper function to get status badge class
+const getStatusBadgeClass = (status: string) => {
+  switch (status) {
+    case 'NEW':
+      return 'bg-blue-100 text-blue-600'
+    case 'SHIPPING':
+      return 'bg-yellow-100 text-yellow-600'
+    case 'DELIVERED':
+      return 'bg-green-100 text-green-600'
+    case 'CANCELLED':
+      return 'bg-red-100 text-red-600'
+    default:
+      return 'bg-gray-100 text-gray-600'
+  }
+}
+
+// Helper function to get status label
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'NEW':
+      return 'Mới'
+    case 'SHIPPING':
+      return 'Đang giao hàng'
+    case 'DELIVERED':
+      return 'Đã vận chuyển'
+    case 'CANCELLED':
+      return 'Đã hủy'
+    default:
+      return status
+  }
+}
+
+export default function OrderPage() {
   const navigate = useNavigate()
-  const { orders, activeTab, isLoading, error, fetchOrders, setActiveTab } = useOrderStore()
+  const {
+    orders,
+    totalPages,
+    totalOrders,
+    currentPage,
+    pageSize,
+    isLoading,
+    fetchOrders,
+    setSearchFilters,
+    deleteMultipleOrders,
+  } = useOrderStore()
+
+  // Local state for form inputs
+  const [searchCustomer, setSearchCustomer] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([])
+
+  // Pagination state
+  const [pageSizeOptions] = useState([1, 5, 10, 20])
 
   useEffect(() => {
     fetchOrders()
   }, [fetchOrders])
 
-  const filteredOrders =
-    activeTab === 'all' ? orders : orders.filter((order) => order.status === activeTab)
+  // Handle search and filter submission
+  const handleSearch = () => {
+    setSearchFilters(searchCustomer, selectedStatus, null, null)
+    fetchOrders({
+      page: 1,
+      customerName: searchCustomer,
+      status: selectedStatus ?? undefined,
+    })
+  }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'new':
-        return <Badge className="bg-blue-500">New</Badge>
-      case 'delivered':
-        return <Badge className="bg-green-500">Delivered</Badge>
-      case 'cancelled':
-        return <Badge className="bg-red-500">Cancelled</Badge>
-      default:
-        return null
+  const handlePageChange = useCallback(
+    (page: number) => {
+      // Only fetch if the requested page is different from the current page
+      if (page !== currentPage) {
+        fetchOrders({
+          page,
+          customerName: searchCustomer || undefined,
+          status: selectedStatus || undefined,
+        })
+      }
+    },
+    [currentPage, fetchOrders, searchCustomer, selectedStatus]
+  )
+
+  const handlePageSizeChange = (size: string) => {
+    fetchOrders({
+      page: 1,
+      size: Number.parseInt(size),
+      customerName: searchCustomer || undefined,
+      status: selectedStatus || undefined,
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedOrders.length === orders.length) {
+      setSelectedOrders([])
+    } else {
+      setSelectedOrders(orders.map((order) => order.id))
     }
+  }
+
+  const handleSelectOrder = (id: string) => {
+    if (selectedOrders.includes(id)) {
+      setSelectedOrders(selectedOrders.filter((orderId) => orderId !== id))
+    } else {
+      setSelectedOrders([...selectedOrders, id])
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa các đơn hàng đã chọn?')) {
+      await deleteMultipleOrders(selectedOrders)
+      setSelectedOrders([])
+    }
+  }
+
+  const handleFilterByStatus = (status: string | null) => {
+    setSelectedStatus(status)
+    fetchOrders({
+      page: 1,
+      status: status === 'all' ? undefined : status,
+      customerName: searchCustomer,
+    })
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Đơn hàng</h1>
-        <Button variant="destructive">Xóa đơn hàng</Button>
+        <div className="flex space-x-2">
+          <Button
+            variant="destructive"
+            onClick={handleDeleteSelected}
+            disabled={selectedOrders.length === 0}
+          >
+            Xóa đơn hàng
+          </Button>
+        </div>
       </div>
 
-      <Tabs
-        defaultValue="all"
-        value={activeTab}
-        onValueChange={(value: any) => setActiveTab(value)}
-      >
-        <TabsList className="grid grid-cols-4 w-[400px]">
-          <TabsTrigger value="all">Tất cả</TabsTrigger>
-          <TabsTrigger value="new">Mới</TabsTrigger>
-          <TabsTrigger value="delivered">Đã giao hàng</TabsTrigger>
-          <TabsTrigger value="cancelled">Đã hủy</TabsTrigger>
-        </TabsList>
+      {/* Search */}
+      {/* <div className="relative flex-1">
+        <Input
+          placeholder="Tìm kiếm theo tên khách hàng"
+          value={searchCustomer}
+          onChange={(e) => setSearchCustomer(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch()
+            }
+          }}
+          className="pl-10"
+        />
+        <div className="absolute left-3 top-2.5 text-gray-400">
+          <Search className="h-5 w-5" />
+        </div>
+      </div> */}
 
-        <TabsContent value={activeTab} className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-4">Đang tải...</div>
-          ) : error ? (
-            <div className="text-center py-4 text-red-500">{error}</div>
-          ) : (
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead>Mã đơn hàng</TableHead>
-                    <TableHead>Khách hàng</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead>Giá đơn hàng</TableHead>
-                    <TableHead>Ngày đặt</TableHead>
-                    <TableHead className="w-16"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell>{order.id}</TableCell>
-                      <TableCell>{order.customerName}</TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
-                      <TableCell>{order.orderDate}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-orange-500 hover:text-orange-600"
-                          onClick={() => navigate(`/admin/orders/edit/${order.id}`)}
-                        >
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Chỉnh sửa đơn hàng
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-
-                  {filteredOrders.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-4">
-                        Không tìm thấy đơn hàng nào
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          {/* Pagination */}
-          <div className="flex justify-center mt-4">
-            <nav className="flex items-center space-x-1">
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                1
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                2
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                3
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                4
-              </Button>
-              <span className="px-2">...</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                99
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                100
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+      {/* Order status tabs */}
+      <div className="w-full overflow-x-auto">
+        <div className="flex justify-center">
+          <div className="inline-flex gap-2 rounded-md p-2 border min-w-max">
+            {[
+              { key: null, label: 'Tất cả', color: 'bg-gray-200 text-gray-600' },
+              { key: 'NEW', label: 'Mới', color: 'bg-blue-100 text-blue-600' },
+              { key: 'SHIPPING', label: 'Đang giao hàng', color: 'bg-yellow-100 text-yellow-600' },
+              { key: 'DELIVERED', label: 'Đã vận chuyển', color: 'bg-green-100 text-green-600' },
+              { key: 'CANCELLED', label: 'Đã hủy', color: 'bg-red-100 text-red-600' },
+            ].map(({ key, label, color }) => {
+              const isSelected = selectedStatus === key
+              return (
+                <Button
+                  key={key ?? 'all'}
+                  variant="ghost"
+                  className={`rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap ${
+                    isSelected ? `${color} pointer-events-none` : ''
+                  }`}
+                  onClick={() => handleFilterByStatus(key)}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Button>
-            </nav>
+                  {label}
+                </Button>
+              )
+            })}
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
+
+      {/* Results per page selector */}
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-gray-500">
+          Hiển thị {orders.length} / {totalOrders} đơn hàng
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-500">Hiển thị:</span>
+          <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+            <SelectTrigger className="w-[80px]">
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent>
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Orders Table */}
+      <div className="border rounded-md relative">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={selectedOrders.length === orders.length && orders.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
+              <TableHead>Mã đơn hàng</TableHead>
+              <TableHead>Khách hàng</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Giá đơn hàng</TableHead>
+              <TableHead>Ngày đặt</TableHead>
+              <TableHead className="w-16"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedOrders.includes(order.id)}
+                    onCheckedChange={() => handleSelectOrder(order.id)}
+                  />
+                </TableCell>
+                <TableCell>{order.id}</TableCell>
+                <TableCell>{order.customerName}</TableCell>
+                <TableCell>
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(
+                      order.status
+                    )}`}
+                  >
+                    {getStatusLabel(order.status)}
+                  </span>
+                </TableCell>
+                <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
+                <TableCell>{formatDate(order.createdAt)}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/admin/orders/edit/${order.id}`)}
+                    className="hover:cursor-pointer text-orange-500"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Chỉnh sửa
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {orders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-4">
+                  Không tìm thấy đơn hàng nào
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        disabled={isLoading}
+      />
     </div>
   )
 }

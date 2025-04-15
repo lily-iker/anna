@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import axios from '@/lib/axios-custom'
-import type { Product } from '@/types'
-import type { Page, ProductPaginationParams } from '@/types/pagination'
+import type { ApiResponse, Product } from '@/types'
+import type { ProductPaginationParams } from '@/types/pagination'
 import toast from 'react-hot-toast'
 
 interface ProductStoreState {
@@ -37,7 +37,7 @@ interface ProductStoreState {
   fetchProducts: (params?: Partial<ProductPaginationParams>) => Promise<void>
   addProduct: (formData: FormData) => Promise<Product | null>
   updateProduct: (id: string, formData: FormData) => Promise<Product | null>
-  deleteProduct: (id: string) => Promise<void>
+  deleteProducts: (ids: string[]) => Promise<void>
 }
 
 const useProductStore = create<ProductStoreState>((set, get) => ({
@@ -117,7 +117,7 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
         params?.categoryName !== undefined ? params.categoryName : state.categoryName
 
       // Spring Boot expects 0-based page index
-      const response = await axios.get<Page<Product>>('/api/product/search', {
+      const response = await axios.get<ApiResponse>('/api/product/search', {
         params: {
           page: page - 1, // Convert to 0-based for Spring
           size,
@@ -129,9 +129,9 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
       })
 
       set({
-        products: response.data.content,
-        totalProducts: response.data.page.totalElements,
-        totalPages: response.data.page.totalPages,
+        products: response.data.result.content,
+        totalProducts: response.data.result.page.totalElements,
+        totalPages: response.data.result.page.totalPages,
         currentPage: page,
         pageSize: size,
         isLoading: false,
@@ -197,21 +197,26 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
     }
   },
 
-  deleteProduct: async (id: string) => {
+  deleteProducts: async (ids: string[]) => {
     set({ isLoading: true, error: null })
     try {
-      await axios.delete(`/api/product/${id}`)
+      // Send a DELETE request to the new endpoint with the list of product IDs
+      await axios.delete('/api/product/delete-by-ids', {
+        data: { productIds: ids }, // Send the list of product IDs in the request body
+      })
 
+      // Update the state to remove the deleted products from the list
       set((state) => ({
-        products: state.products.filter((p) => p.id !== id),
+        products: state.products.filter((p) => !ids.includes(p.id)),
         isLoading: false,
       }))
 
+      // Display a success message
       toast.success('Xóa sản phẩm thành công!')
     } catch (error: any) {
-      console.error('Error deleting product:', error)
+      console.error('Error deleting products:', error)
       toast.error('Xóa sản phẩm thất bại: ' + error.response?.data?.message || 'Lỗi không xác định')
-      set({ isLoading: false, error: 'Failed to delete product.' })
+      set({ isLoading: false, error: 'Failed to delete products.' })
     }
   },
 }))

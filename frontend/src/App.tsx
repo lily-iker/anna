@@ -5,6 +5,7 @@ import MainLayout from './components/layout/main-layout'
 import { useAuthStore } from './stores/useAuthStore'
 import ContactPage from './pages/ContactPage'
 import CartPage from './pages/CartPage'
+import EditOrderPage from './pages/admin/EditOrderPage'
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -60,6 +61,8 @@ function App() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/add" element={<AddProductPage />} />
         <Route path="products/edit/:id" element={<EditProductPage />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="orders/edit/:id" element={<EditOrderPage />} />
         <Route path="blogs" element={<BlogsPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="banners" element={<BannerPage />} />

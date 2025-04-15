@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit, Filter, Search, X } from 'lucide-react'
+import { Edit, Search } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { Pagination } from '@/components/ui/pagination'
 import useProductStore from '@/stores/useProductStore'
@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
 
 export default function ProductsPage() {
   const navigate = useNavigate()
@@ -37,17 +36,15 @@ export default function ProductsPage() {
     pageSize,
     isLoading,
     fetchProducts,
+    deleteProducts,
     setSearchFilters,
   } = useProductStore()
 
-  const { categories, fetchCategories } = useCategoryStore()
+  const { fetchCategories } = useCategoryStore()
 
   // Local state for form inputs
   const [searchTerm, setSearchTerm] = useState('')
-  const [priceRange, setPriceRange] = useState([0, 800000])
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-  const [showFilters, setShowFilters] = useState(false)
 
   // Pagination state
   const [pageSizeOptions] = useState([1, 5, 10, 20])
@@ -62,28 +59,10 @@ export default function ProductsPage() {
 
   // Handle search and filter submission
   const handleSearch = () => {
-    setSearchFilters(searchTerm, priceRange[0], priceRange[1], selectedCategory)
+    setSearchFilters(searchTerm, 0, 10000000, null)
     fetchProducts({
       page: 1,
       name: searchTerm,
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-      categoryName: selectedCategory ?? undefined,
-    })
-  }
-
-  // Reset filters
-  const handleResetFilters = () => {
-    setSearchTerm('')
-    setPriceRange([0, 800000])
-    setSelectedCategory(null)
-    setSearchFilters('', 0, 800000, null)
-    fetchProducts({
-      page: 1,
-      name: '',
-      minPrice: 0,
-      maxPrice: 800000,
-      categoryName: '',
     })
   }
 
@@ -119,7 +98,7 @@ export default function ProductsPage() {
 
   const handleDeleteSelected = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa các sản phẩm đã chọn?')) {
-      // await useProductStore.getState().deleteMultipleProducts(selectedProducts)
+      await deleteProducts(selectedProducts)
       setSelectedProducts([])
     }
   }
@@ -138,83 +117,6 @@ export default function ProductsPage() {
           </Button>
           <Button onClick={() => navigate('/admin/products/add')}>Thêm sản phẩm</Button>
         </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="space-y-4 bg-white p-4 rounded-md border">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Input
-              placeholder="Tìm kiếm tên sản phẩm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            <div className="absolute left-3 top-2.5 text-gray-400">
-              <Search className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleSearch}>Tìm kiếm</Button>
-
-            <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
-              <Filter className="h-4 w-4 mr-1" />
-              {showFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
-            </Button>
-
-            <Button variant="ghost" onClick={handleResetFilters} className="text-gray-500">
-              <X className="h-4 w-4 mr-1" />
-              Xóa lọc
-            </Button>
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className="pt-4 border-t">
-            <div className="space-y-6 md:space-y-0 md:flex md:items-top md:gap-8">
-              {/* Category Filter */}
-              <div className="flex-1">
-                <h3 className="text-sm font-medium mb-2">Danh mục</h3>
-                <Select
-                  value={selectedCategory || 'all'}
-                  onValueChange={(value) => setSelectedCategory(value === 'all' ? null : value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Tất cả danh mục" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả danh mục</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.name}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Price Range Filter */}
-              <div className="flex-1">
-                <h3 className="text-sm font-medium mb-2">Khoảng giá</h3>
-                <div className="px-2">
-                  <Slider
-                    value={priceRange}
-                    min={0}
-                    max={1000000}
-                    step={10000}
-                    onValueChange={setPriceRange}
-                    className="my-6"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>{formatCurrency(priceRange[0])}</span>
-                    <span>{formatCurrency(priceRange[1])}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Results per page selector */}
@@ -242,6 +144,26 @@ export default function ProductsPage() {
 
       {/* Products Table with optimistic UI */}
       <div className="border rounded-md relative">
+        {/* Search */}
+        <div className="p-4 flex justify-end">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3 text-gray-400 h-5 w-5" /> {/* Icon on the left */}
+            <Input
+              placeholder="Tìm kiếm tên sản phẩm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch()
+                }
+              }}
+              className="pl-10 w-full"
+            />
+          </div>
+        </div>
+
+        <div className="border border-gray-200"></div>
+
         <Table>
           <TableHeader>
             <TableRow>

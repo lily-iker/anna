@@ -4,6 +4,7 @@ const baseURL = 'http://localhost:8080'
 
 const instance = axios.create({
   baseURL: baseURL,
+  withCredentials: true,
 })
 
 export function getCookie(name: string) {

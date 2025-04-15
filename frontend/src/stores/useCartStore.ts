@@ -154,7 +154,7 @@ const useCartStore = create<CartState>()(
           console.log('Product IDs:', productIds)
 
           // Fetch product details from API
-          const response = await axios.post('/api/product/by-ids', {
+          const response = await axios.post('/api/product/get-by-ids', {
             productIds, // Send as request body
           })
 

@@ -102,9 +102,9 @@ export default function MainNavbar() {
         <header
           className={`fixed top-11 left-0 w-full z-50 transition-all duration-300 ${
             location.pathname === '/' && scrolled
-              ? 'shadow-md bg-[#9DE25C]' // On the homepage, apply this styles only when scrolled
+              ? 'shadow-md bg-[#DEF5E3]' // On the homepage, apply this styles only when scrolled
               : location.pathname !== '/'
-              ? 'shadow-md bg-[#9DE25C]'
+              ? 'shadow-md bg-[#DEF5E3]'
               : '' // On all other pages, apply this styles by default
           }`}
         >
@@ -230,7 +230,7 @@ export default function MainNavbar() {
             </Link>
             <Button
               variant="ghost"
-              className="mt-4 flex items-center gap-2 bg-[#9DE25C] text-gray-700 hover:text-green-600 font-medium px-0"
+              className="mt-4 flex items-center gap-2 bg-[#DEF5E3] text-gray-700 hover:text-green-600 font-medium px-0"
               onClick={() => {
                 navigate('/cart')
                 setSidebarOpen(false)

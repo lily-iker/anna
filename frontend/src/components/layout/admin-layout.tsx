@@ -1,11 +1,20 @@
-'use client'
-
 import { useState, useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import AdminNavbar from './admin-navbar'
 import AdminSidebar from './admin-sidebar'
+import { useAuthStore } from '@/stores/useAuthStore'
+import UnauthorizedPage from '@/pages/error/UnauthorizedPage'
 
 export default function AdminLayout() {
+  const { authUser, isLoading } = useAuthStore()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoading && authUser?.role !== 'ADMIN') {
+      navigate('/login')
+    }
+  }, [authUser, isLoading, navigate])
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Close sidebar when screen size changes to avoid sidebar staying open when resizing

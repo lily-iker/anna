@@ -1,3 +1,9 @@
+export interface ApiResponse {
+  status: number
+  message: string
+  result: any
+}
+
 export interface Product {
   id: string
   name: string
@@ -41,4 +47,33 @@ export interface Blog {
   sapo: string
   content: string
   author: string
+}
+
+export type Customer = {
+  id: string
+  name: string
+  phoneNumber: string
+  address: string
+  email: string
+  totalOrders: number
+}
+
+export interface OrderItem {
+  id: string
+  productId: string
+  productThumbnailImage: string
+  productName: string
+  quantity: number
+  price: number
+}
+
+export interface Order {
+  id: string
+  estimatedDeliveryDate: string
+  note: string
+  totalPrice: number
+  status: 'NEW' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
+  customerName: string
+  createdAt: string
+  items: OrderItem[]
 }
