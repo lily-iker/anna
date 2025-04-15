@@ -1,12 +1,9 @@
-'use client'
-
 import type React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -16,11 +13,12 @@ import {
 } from '@/components/ui/select'
 import useProductStore from '@/stores/useProductStore'
 import useCategoryStore from '@/stores/useCategoryStore'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { currenetProduct, updateProduct, fetchProductById, deleteProduct, isLoading } =
+  const { currenetProduct, updateProduct, fetchProductById, deleteProducts, isLoading } =
     useProductStore()
   const { categories, fetchCategories } = useCategoryStore()
   const [formData, setFormData] = useState({
@@ -119,7 +117,7 @@ export default function EditProductPage() {
     })
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
     // Add validation for stock and minUnitToOrder
@@ -140,6 +138,13 @@ export default function EditProductPage() {
         name === 'discountPercentage'
           ? Number.parseFloat(value) || 0
           : value,
+    }))
+  }
+
+  const handleDescriptionChange = (html: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: html,
     }))
   }
 
@@ -174,7 +179,7 @@ export default function EditProductPage() {
 
   const handleDelete = async () => {
     if (id && window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-      await deleteProduct(id)
+      await deleteProducts([id])
       navigate('/admin/products')
     }
   }
@@ -312,14 +317,10 @@ export default function EditProductPage() {
               <Label htmlFor="description" className="text-sm font-medium">
                 Mô tả sản phẩm <span className="text-red-500">*</span>
               </Label>
-              <Textarea
-                id="description"
-                name="description"
+              <RichTextEditor
                 value={formData.description}
-                onChange={handleChange}
-                rows={5}
-                className="mt-1 h-30"
-                required
+                onChange={handleDescriptionChange}
+                className="mt-1"
               />
             </div>
 
