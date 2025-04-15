@@ -7,7 +7,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import vn.fruit.anna.enums.TokenType;
 import vn.fruit.anna.model.User;
@@ -41,7 +40,7 @@ public class JwtService {
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer("https://github.com/lily-iker")
-                .setExpiration(new Date(System.currentTimeMillis() + accessExpiryTime))
+                .setExpiration(new Date(System.currentTimeMillis() + 10000))
                 .signWith(getKey(TokenType.ACCESS_TOKEN), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -2,13 +2,12 @@ package vn.fruit.anna.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import vn.fruit.anna.enums.Unit;
 
 import java.sql.Types;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -24,6 +23,8 @@ public class Product extends BaseEntity {
 
     private String name;
 
+    private String origin;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -31,11 +32,9 @@ public class Product extends BaseEntity {
 
     private Double originalPrice;
 
-    private Double discountPrice;
+    private Double sellingPrice;
 
-    private Double minPrice;
-
-    private Double maxPrice;
+    private Double discountPercentage;
 
     @Enumerated(EnumType.STRING)
     private Unit unit;
@@ -44,6 +43,7 @@ public class Product extends BaseEntity {
 
     private Integer minUnitToOrder;
 
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductImage> productImages = new HashSet<>();
 

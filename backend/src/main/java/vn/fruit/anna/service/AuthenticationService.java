@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +17,7 @@ import vn.fruit.anna.repository.UserRepository;
 
 import java.util.Arrays;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -39,7 +41,7 @@ public class AuthenticationService {
         accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setAttribute("SameSite", "Strict");
-        accessTokenCookie.setMaxAge(60 * 10);
+        accessTokenCookie.setMaxAge(10);
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
@@ -74,10 +76,10 @@ public class AuthenticationService {
             throw new RuntimeException("Token can not be blank");
         }
 
-        final String username = jwtService.extractEmail(refreshToken, TokenType.REFRESH_TOKEN);
+        final String email = jwtService.extractEmail(refreshToken, TokenType.REFRESH_TOKEN);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email not found"));
 
         if (!jwtService.isValidToken(refreshToken, TokenType.REFRESH_TOKEN, user)) {
             throw new RuntimeException("Invalid Token");
@@ -89,7 +91,7 @@ public class AuthenticationService {
         accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setAttribute("SameSite", "Strict");
-        accessTokenCookie.setMaxAge(60 * 60);
+        accessTokenCookie.setMaxAge(10);
 
         response.addCookie(accessTokenCookie);
 

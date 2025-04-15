@@ -5,13 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import vn.fruit.anna.enums.BannerType;
+import vn.fruit.anna.enums.OrderStatus;
 import vn.fruit.anna.enums.RoleName;
 import vn.fruit.anna.enums.Unit;
 import vn.fruit.anna.model.*;
 import vn.fruit.anna.repository.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +25,9 @@ public class DataInitializer {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @PostConstruct
     public void initData() {
@@ -32,6 +36,8 @@ public class DataInitializer {
         initProducts();
         initBanners();
         initBlogs();
+        initCustomers();
+        initOrders();
     }
 
     public void initAdminAccount() {
@@ -66,7 +72,7 @@ public class DataInitializer {
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742819903/danh_m%E1%BB%A5c_pre_xatkoe.jpg").build(),
                 Category.builder().name("Trái cây theo mùa")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742819903/danh_m%E1%BB%A5c_pre_xatkoe.jpg").build(),
-                Category.builder().name("Combo ưu đãi")
+                Category.builder().name("Giỏ hoa quả")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742819903/danh_m%E1%BB%A5c_pre_xatkoe.jpg").build()
         );
         categoryRepository.saveAll(categories);
@@ -76,170 +82,205 @@ public class DataInitializer {
     private void initProducts() {
         if (productRepository.count() > 0) return;
 
+        Category importedFruitCategory = categoryRepository.findByName("Trái cây nhập khẩu").get();
+        Category seasonalFruitCategory = categoryRepository.findByName("Trái cây theo mùa").get();
+        Category setFruit = categoryRepository.findByName("Giỏ hoa quả").get();
+
         List<Product> products = List.of(
                 Product.builder()
                         .name("Set giỏ hoa quả")
-                        .description("Giỏ quà trái cây cao cấp, được tuyển chọn từ những loại trái cây tươi ngon như nho xanh, cam, lê, táo, cherry. Trái cây được sắp xếp tỉ mỉ trong giỏ mây tre thủ công, trang trí tinh tế với nơ lụa và lớp lưới sang trọng, mang lại cảm giác nhẹ nhàng, thanh lịch. Đây là món quà hoàn hảo cho các dịp biếu tặng đối tác, chúc mừng, thăm hỏi sức khỏe hoặc kỷ niệm đặc biệt.")
+                        .origin("Vietnam")
+                        .description("Giỏ quà trái cây cao cấp, được tuyển chọn từ những loại trái cây tươi ngon như nho xanh, cam, lê, táo, cherry...")
                         .originalPrice(250000.0)
-                        .discountPrice(250000.0)
-                        .unit(Unit.PIECE)
+                        .sellingPrice(250000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.Hộp)
                         .stock(20)
                         .minUnitToOrder(1)
                         .thumbnailImage(null)
+                        .category(importedFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Sữa óc chó hạnh nhân Hàn Quốc")
-                        .description("Sữa óc chó hạnh nhân Hàn Quốc là một loại thức uống phổ biến, thường được biết đến với hương vị thơm ngon và giá trị dinh dưỡng cao. Nó được làm từ quả óc chó và hạnh nhân, có thể bổ sung các vitamin và khoáng chất quan trọng cho cơ thể. Sản phẩm này thường được đóng gói tiện lợi, dễ dàng sử dụng và bảo quản. Nó cũng có thể được sử dụng như một phần của chế độ ăn uống lành mạnh hoặc là một lựa chọn thay thế cho sữa bò.")
+                        .origin("South Korea")
+                        .description("Sữa óc chó hạnh nhân Hàn Quốc là một loại thức uống phổ biến, thường được biết đến với hương vị thơm ngon và giá trị dinh dưỡng cao...")
                         .originalPrice(190000.0)
-                        .discountPrice(190000.0)
-                        .unit(Unit.CASE)  // Assuming each case contains 16 boxes
+                        .sellingPrice(190000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.Hộp)
                         .stock(10)
                         .minUnitToOrder(1)
                         .thumbnailImage(null)
+                        .category(setFruit)
                         .build(),
 
                 Product.builder()
                         .name("Táo STORY Pháp")
-                        .description("Táo Story giống Pháp có hình dáng tròn đều, lớp vỏ mịn màng với sắc đỏ quyến rũ xen lẫn ánh vàng tự nhiên. Phần thịt quả trắng ngần, giòn tan vị ngọt thanh hòa quyện cùng chút chua nhẹ, tạo nên hương vị cân bằng hoàn hảo. Hương táo thơm ngát, dịu dàng, cảm giác tươi mát và thư giãn. Táo Story không chỉ phù hợp để ăn tươi mà còn là nguyên liệu lý tưởng cho các món salad, nước ép hay tráng miệng.")
+                        .origin("France")
+                        .description("Táo Story giống Pháp có hình dáng tròn đều, lớp vỏ mịn màng với sắc đỏ quyến rũ...")
                         .originalPrice(40000.0)
-                        .discountPrice(40000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(40000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(40)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736196/taostory_03_qcd8g1.jpg")
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Táo EVERCRISP S32")
-                        .description("Táo EverCrisp Mỹ là giống táo cao cấp, kết hợp hoàn hảo giữa Fuji và Honeycrisp. Với vỏ đỏ đậm pha vàng, thịt trắng giòn mọng, vị ngọt thanh mát và hương thơm nhẹ, EverCrisp đáp ứng nhu cầu ăn tươi hoặc chế biến. Táo nổi bật với khả năng bảo quản lâu và giàu giá trị dinh dưỡng.")
+                        .origin("USA")
+                        .description("Táo EverCrisp Mỹ là giống táo cao cấp, kết hợp hoàn hảo giữa Fuji và Honeycrisp...")
                         .originalPrice(60000.0)
-                        .discountPrice(60000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(60000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(40)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736196/taoever32_03_crpvz8.jpg")
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Cam Ai Cập")
-                        .description("Cam Ai Cập sở hữu một vị thanh ngọt đặc trưng cùng với mùi thơm nức từ vỏ quả. Nhìn từ bên ngoài, trái cam màu sắc tươi sáng, có lớp vỏ mỏng đặc trưng. Khi cắt quả ra, bạn sẽ thấy phần thịt bên trong khá dày và vị ngon ngọt hấp dẫn. Đặc biệt, loại cam này mọng nước và không hề có hạt. Thưởng thức cam Ai Cập, hưỡng vị thanh mát đậm đà sẽ thấm dần từ đầu lưỡi tới cổ họng.")
+                        .origin("Egypt")
+                        .description("Cam Ai Cập sở hữu một vị thanh ngọt đặc trưng cùng với mùi thơm nức từ vỏ quả...")
                         .originalPrice(15000.0)
-                        .discountPrice(15000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(15000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(15)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/camaicap_01_qygdij.jpg")
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Việt Quất Peru")
-                        .description("Việt quất Peru là loại quả có vị ngọt thanh, thơm đặc trưng, rất giàu vitamin và chất chống oxi hóa nên còn được mệnh danh là siêu thực phẩm cho sức khỏe con người.")
+                        .origin("Peru")
+                        .description("Việt quất Peru là loại quả có vị ngọt thanh, thơm đặc trưng, rất giàu vitamin...")
                         .originalPrice(35000.0)
-                        .discountPrice(35000.0)
-                        .unit(Unit.CUP)
+                        .sellingPrice(35000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.Hộp)
                         .stock(24)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736196/vietquatperu_03_x8yi8q.jpg")
+                        .category(importedFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Nho xanh Úc")
-                        .description("Nho xanh Úc là loại trái cây phổ biến, nổi tiếng với vị ngọt thanh, giòn tan và không hạt. Chất lượng của nho xanh Úc thường được đánh giá cao do quy trình trồng trọt và thu hoạch nghiêm ngặt. Chúng thường được dùng để ăn trực tiếp hoặc làm nguyên liệu cho các món tráng miệng, salad trái cây.")
+                        .origin("Australia")
+                        .description("Nho xanh Úc là loại trái cây phổ biến, nổi tiếng với vị ngọt thanh, giòn tan...")
                         .originalPrice(89000.0)
-                        .discountPrice(89000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(89000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(20)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/nhoxanhuc_02_jogemo.jpg")
+                        .category(importedFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Quất đường Đài Loan")
-                        .description("Quất đường Đài Loan, còn gọi là 'Kumquat Đài Loan', là một loại trái cây thuộc họ cam quýt, nổi tiếng với vị ngọt đặc trưng và vỏ ăn được. Loại quả này thường được trồng ở các vùng có khí hậu ấm áp và được ưa chuộng để ăn tươi, làm mứt, hoặc làm nguyên liệu trong các món tráng miệng và đồ uống. Điểm đặc biệt của quất đường Đài Loan là vỏ mỏng, ngọt hơn ruột, tạo nên một trải nghiệm hương vị độc đáo.")
+                        .origin("Taiwan")
+                        .description("Quất đường Đài Loan, còn gọi là 'Kumquat Đài Loan', là một loại trái cây thuộc họ cam quýt...")
                         .originalPrice(45000.0)
-                        .discountPrice(45000.0)
-                        .unit(Unit.PACK)
+                        .sellingPrice(45000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.Hộp)
                         .stock(12)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/quatduongdailoan_01_s2desw.jpg")
+                        .category(setFruit)
                         .build(),
 
                 Product.builder()
                         .name("Lê nâu Hàn Quốc")
-                        .description("Lê nâu Hàn Quốc, còn được biết đến với tên gọi lê tuyết hoặc lê Á, là một loại trái cây phổ biến tại Hàn Quốc. Chúng có vỏ màu vàng nâu, ruột trắng giòn, và vị ngọt thanh, mọng nước. Lê nâu Hàn Quốc thường được ăn tươi trực tiếp hoặc sử dụng trong các món tráng miệng, đồ uống và các món ăn khác. Chúng cũng được biết đến với một số lợi ích sức khỏe như hỗ trợ tiêu hóa và cung cấp vitamin.")
+                        .origin("South Korea")
+                        .description("Lê nâu Hàn Quốc, còn được biết đến với tên gọi lê tuyết hoặc lê Á, là một loại trái cây phổ biến tại Hàn Quốc...")
                         .originalPrice(40000.0)
-                        .discountPrice(40000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(40000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(30)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/lenauhan_01_oc3lf1.jpg")
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Xoài Phá Thái")
-                        .description("Xoài Phá Thái, hay còn gọi là xoài Thái Lan, là một loại xoài nổi tiếng ở Việt Nam. Giống xoài này được ưa chuộng vì vị ngọt, thơm đặc trưng và kích thước lớn, thịt quả dày. Chúng thường được dùng để ăn tươi hoặc chế biến thành các món tráng miệng như sinh tố, kem, hoặc các món ăn vặt.")
+                        .origin("Thailand")
+                        .description("Xoài Phá Thái, hay còn gọi là xoài Thái Lan, là một loại xoài nổi tiếng ở Việt Nam...")
                         .originalPrice(20000.0)
-                        .discountPrice(20000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(20000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(30)
                         .minUnitToOrder(5)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736195/xoaiphathai_01_wrzzg3.jpg")
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Táo Ambrosia Mỹ size 72")
+                        .origin("USA")
                         .description("Táo Ambrosia Mỹ joyfully hình chuông siêu sang và đẹp. Táo đỏ bóng, đẹp, cuống tươi xanh, giòn ngọt và cực thơm.")
                         .originalPrice(65000.0)
-                        .discountPrice(65000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(65000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(30)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/taoam_03_ruvzv4.jpg")
+                        .category(importedFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Roi lòng xanh An Phước")
-                        .description("Roi lòng xanh An Phước là một giống roi nổi tiếng, được biết đến với vị ngọt thanh mát và thịt giòn. Giống roi này thường có vỏ màu xanh, hình dáng đẹp mắt và được ưa chuộng trong thị trường trái cây.")
+                        .origin("Vietnam")
+                        .description("Roi lòng xanh An Phước là một giống roi nổi tiếng, được biết đến với vị ngọt thanh mát và thịt giòn...")
                         .originalPrice(30000.0)
-                        .discountPrice(30000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(30000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(20)
                         .minUnitToOrder(2)
                         .thumbnailImage(null)
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Cam sành Vĩnh Long")
-                        .description("Cam sành Vĩnh Long là một loại trái cây đặc sản nổi tiếng của tỉnh Vĩnh Long, Việt Nam. Loại cam này được yêu thích bởi vị ngọt thanh, mọng nước và hương thơm đặc trưng.")
+                        .origin("Vietnam")
+                        .description("Cam sành Vĩnh Long là một loại trái cây đặc sản nổi tiếng của tỉnh Vĩnh Long, Việt Nam...")
                         .originalPrice(11000.0)
-                        .discountPrice(11000.0)
-                        .unit(Unit.KILOGRAM)
+                        .sellingPrice(11000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
                         .stock(20)
                         .minUnitToOrder(2)
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/lenauhan_01_oc3lf1.jpg")
+                        .category(seasonalFruitCategory)
                         .build(),
 
                 Product.builder()
                         .name("Xoài bao tử")
-                        .description("Xoài bao tử là xoài non, còn nhỏ, thường được dùng làm món ăn vặt. Chúng có vị chua ngọt đặc trưng và thường được chấm với muối ớt, mắm ruốc hoặc 'nước chấm thần thánh'. Xoài bao tử có thể cung cấp vitamin C và các chất xơ.")
+                        .origin("Vietnam")
+                        .description("Xoài bao tử là xoài non, còn nhỏ, thường được dùng làm món ăn vặt...")
                         .originalPrice(12000.0)
-                        .discountPrice(12000.0)
-                        .unit(Unit.KILOGRAM)
-                        .stock(20)
-                        .minUnitToOrder(2)
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736195/xoaiphathai_01_wrzzg3.jpg")
-                        .build(),
-
-                Product.builder()
-                        .name("Bưởi Bến Tre Nguyễn Hằng")
-                        .description("Bưởi Bến Tre là một loại trái cây đặc sản của tỉnh Bến Tre, Việt Nam, nổi tiếng với vị ngọt thanh, mọng nước và hương thơm đặc trưng. Loại bưởi này thường được trồng ở vùng đất phù sa màu mỡ, tạo nên chất lượng vượt trội so với các loại bưởi khác.")
-                        .originalPrice(27000.0)
-                        .discountPrice(27000.0)
-                        .unit(Unit.PIECE)
-                        .stock(24)
-                        .minUnitToOrder(2)
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/quatduongdailoan_01_s2desw.jpg")
+                        .sellingPrice(12000.0)
+                        .discountPercentage(0.0)
+                        .unit(Unit.KG)
+                        .stock(15)
+                        .minUnitToOrder(3)
+                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742736194/xoao_bautu_03_hq9hdy.jpg")
+                        .category(seasonalFruitCategory)
                         .build()
         );
 
@@ -384,5 +425,146 @@ public class DataInitializer {
         blogRepository.saveAll(blogs);
         System.out.println("✅ Blogs inserted.");
     }
+
+    private void initCustomers() {
+        if (customerRepository.count() > 0) return;
+
+        List<Customer> customers = List.of(
+                Customer.builder()
+                        .name("Nguyễn Văn A")
+                        .email("vana@gmail.com")
+                        .phoneNumber("0909123456")
+                        .address("123 Đường Lê Lợi, Quận 1, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Trần Thị B")
+                        .email("thib@gmail.com")
+                        .phoneNumber("0909876543")
+                        .address("456 Nguyễn Huệ, Quận 1, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Lê Hoàng C")
+                        .email("hoangc@gmail.com")
+                        .phoneNumber("0912345678")
+                        .address("789 Phan Xích Long, Phú Nhuận, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Phan Thị D")
+                        .email("thidi@gmail.com")
+                        .phoneNumber("0908765432")
+                        .address("321 Trường Chinh, Tân Bình, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Đoàn Minh E")
+                        .email("minhe@gmail.com")
+                        .phoneNumber("0918234567")
+                        .address("555 Nguyễn Trãi, Quận 5, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Vũ Thanh F")
+                        .email("thanhf@gmail.com")
+                        .phoneNumber("0923456789")
+                        .address("100 Võ Văn Kiệt, Quận 1, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Bùi Minh G")
+                        .email("minhg@gmail.com")
+                        .phoneNumber("0934567890")
+                        .address("234 Trần Hưng Đạo, Quận 5, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Hồ Thị H")
+                        .email("hothi@gmail.com")
+                        .phoneNumber("0907654321")
+                        .address("890 Lý Thường Kiệt, Quận 11, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Ngô Quang I")
+                        .email("quangi@gmail.com")
+                        .phoneNumber("0945678901")
+                        .address("123 Bà Triệu, Quận 3, TP.HCM")
+                        .build(),
+                Customer.builder()
+                        .name("Vũ Thi J")
+                        .email("thij@gmail.com")
+                        .phoneNumber("0912348765")
+                        .address("654 Nguyễn Thái Học, Quận 1, TP.HCM")
+                        .build()
+        );
+
+        customerRepository.saveAll(customers);
+        System.out.println("✅ Customers inserted.");
+    }
+
+    private void initOrders() {
+        if (orderRepository.count() > 0) return;
+
+        List<Customer> customers = customerRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        if (customers.size() < 3 || products.size() < 3) {
+            System.out.println("⚠️ Not enough customers or products to create orders.");
+            return;
+        }
+
+        // Possible statuses to cycle through
+        OrderStatus[] statuses = OrderStatus.values();
+
+        Random random = new Random();
+
+        for (int i = 0; i < 100; i++) {
+            Customer customer = customers.get(i % customers.size());
+            OrderStatus status = statuses[i % statuses.length];
+
+            Date deliveryDate = new Date(System.currentTimeMillis() + (2 + i) * 86400000L);
+            String note = "Giao đơn hàng #" + (i + 1);
+
+            Order order = Order.builder()
+                    .customer(customer)
+                    .estimatedDeliveryDate(deliveryDate)
+                    .note(note)
+                    .status(status)
+                    .build();
+
+            order = orderRepository.save(order);
+
+            int numberOfItems = 1 + random.nextInt(3); // 1 to 3 products per order
+            double total = 0.0;
+
+            List<OrderItem> orderItems = new ArrayList<>();
+
+            for (int j = 0; j < numberOfItems; j++) {
+                Product product = products.get(random.nextInt(products.size()));
+                int quantity = 1 + random.nextInt(5); // 1 to 5 units
+
+                OrderItem item = OrderItem.builder()
+                        .order(order)
+                        .product(product)
+                        .quantity(quantity)
+                        .price(product.getSellingPrice())
+                        .build();
+
+                total += item.getPrice() * item.getQuantity();
+                orderItems.add(item);
+            }
+
+            orderItemRepository.saveAll(orderItems);
+            order.setTotalPrice(total);
+            orderRepository.save(order);
+        }
+        System.out.println("✅ Sample orders and order items inserted.");
+
+        Map<UUID, Long> orderCountByCustomer = orderRepository.findAll().stream()
+                .collect(Collectors.groupingBy(o -> o.getCustomer().getId(), Collectors.counting()));
+
+        for (Customer customer : customers) {
+            long total = orderCountByCustomer.getOrDefault(customer.getId(), 0L);
+            customer.setTotalOrders((int) total);
+        }
+
+        customerRepository.saveAll(customers);
+        System.out.println("✅ Updated totalOrders for each customer.");
+    }
+
 
 }
