@@ -13,6 +13,7 @@ import vn.fruit.anna.exception.ResourceNotFoundException;
 import vn.fruit.anna.model.Blog;
 import vn.fruit.anna.repository.BlogRepository;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -20,21 +21,24 @@ import java.util.List;
 public class BlogService {
 
     private final BlogRepository blogRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
     public BlogResponse createBlog(CreateBlogRequest request, MultipartFile imageFile) {
         Blog blog = Blog.builder()
                 .title(request.getTitle())
-//                .thumbnailImage(request.getThumbnailImage())
                 .sapo(request.getSapo())
                 .content(request.getContent())
                 .author(request.getAuthor())
                 .build();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            // TODO: Save image to cloud and set image URL/path
-            System.out.println("Updating image file: " + imageFile.getOriginalFilename());
-            // example: product.setThumbnailImage("https://cdn.com/new-image.jpg");
+            try {
+                String uploadedUrl = cloudinaryService.uploadImage(imageFile);
+                blog.setThumbnailImage(uploadedUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload image for blog", e);
+            }
         }
 
         blogRepository.save(blog);
@@ -51,28 +55,50 @@ public class BlogService {
         blog.setContent(request.getContent());
         blog.setAuthor(request.getAuthor());
 
+        String oldUrl = blog.getThumbnailImage();
+
         if (imageFile != null && !imageFile.isEmpty()) {
-            // TODO: Upload image and set the URL
-            System.out.println("Updating image file: " + imageFile.getOriginalFilename());
-            // Example:
-            // String uploadedUrl = imageUploaderService.upload(imageFile);
-            // blog.setThumbnailImage(uploadedUrl);
+            try {
+                String uploadedUrl = cloudinaryService.uploadImage(imageFile);
+                blog.setThumbnailImage(uploadedUrl);
+
+                if (oldUrl != null && !oldUrl.isBlank()) {
+                    String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                    cloudinaryService.deleteAsset(publicId);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload new image for blog", e);
+            }
         }
 
         blogRepository.save(blog);
         return toResponse(blog);
     }
 
+
     @Transactional
     public void deleteBlogsByIds(ListBlogsByIdsRequest request) {
         List<Long> blogIds = request.getBlogIds();
-
         List<Blog> blogs = blogRepository.findAllById(blogIds);
 
         if (!blogs.isEmpty()) {
+            for (Blog blog : blogs) {
+                String oldUrl = blog.getThumbnailImage();
+
+                if (oldUrl != null && !oldUrl.isBlank()) {
+                    String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                    try {
+                        cloudinaryService.deleteAsset(publicId);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image for blog", e);
+                    }
+                }
+            }
+
             blogRepository.deleteAll(blogs);
         }
     }
+
 
     public BlogResponse getBlogById(Long id) {
         Blog blog = blogRepository.findById(id)

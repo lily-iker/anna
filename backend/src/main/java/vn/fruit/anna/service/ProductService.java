@@ -1,6 +1,10 @@
 package vn.fruit.anna.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +23,24 @@ import vn.fruit.anna.repository.CategoryRepository;
 import vn.fruit.anna.repository.ProductRepository;
 import vn.fruit.anna.repository.specification.ProductSpecification;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
+
+    @PersistenceContext
+    private final EntityManager entityManager;
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request, MultipartFile imageFile) {
@@ -44,7 +56,6 @@ public class ProductService {
                 .name(request.getName())
                 .origin(request.getOrigin())
                 .description(request.getDescription())
-//                .thumbnailImage(request.getThumbnailImage())
                 .originalPrice(request.getOriginalPrice())
                 .sellingPrice(request.getSellingPrice())
                 .discountPercentage(request.getDiscountPercentage())
@@ -55,9 +66,14 @@ public class ProductService {
                 .build();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            // TODO: Save image to cloud and set image URL/path
-            System.out.println("Updating image file: " + imageFile.getOriginalFilename());
-            // example: product.setThumbnailImage("https://cdn.com/new-image.jpg");
+            try {
+                String imageUrl = cloudinaryService.uploadImage(imageFile);
+                product.setThumbnailImage(imageUrl);
+
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error uploading image to Cloudinary");
+            }
         }
 
         // Save product to the database
@@ -68,30 +84,40 @@ public class ProductService {
 
     @Transactional
     public ProductResponse updateProduct(UUID id, CreateProductRequest request, MultipartFile imageFile) {
-        Product existing = productRepository.findById(id)
+        Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found!"));
 
         Category category = categoryRepository.findByName(request.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found!"));
 
-        existing.setName(request.getName());
-        existing.setOrigin(request.getOrigin());
-        existing.setDescription(request.getDescription());
-        existing.setOriginalPrice(request.getOriginalPrice());
-        existing.setSellingPrice(request.getSellingPrice());
-        existing.setDiscountPercentage(request.getDiscountPercentage());
-        existing.setUnit(request.getUnit());
-        existing.setStock(request.getStock());
-        existing.setMinUnitToOrder(request.getMinUnitToOrder());
-        existing.setCategory(category);
+        existingProduct.setName(request.getName());
+        existingProduct.setOrigin(request.getOrigin());
+        existingProduct.setDescription(request.getDescription());
+        existingProduct.setOriginalPrice(request.getOriginalPrice());
+        existingProduct.setSellingPrice(request.getSellingPrice());
+        existingProduct.setDiscountPercentage(request.getDiscountPercentage());
+        existingProduct.setUnit(request.getUnit());
+        existingProduct.setStock(request.getStock());
+        existingProduct.setMinUnitToOrder(request.getMinUnitToOrder());
+        existingProduct.setCategory(category);
+
+        String oldUrl = existingProduct.getThumbnailImage();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            // TODO: Save image to cloud and set image URL/path
-            System.out.println("Updating image file: " + imageFile.getOriginalFilename());
-            // example: existing.setThumbnailImage("https://cdn.com/new-image.jpg");
+            try {
+                String imageUrl = cloudinaryService.uploadImage(imageFile);
+                existingProduct.setThumbnailImage(imageUrl);
+
+                if (oldUrl != null && !oldUrl.isBlank()) {
+                    String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                    cloudinaryService.deleteAsset(publicId);
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error uploading image to Cloudinary");
+            }
         }
 
-        return toResponse(existing);
+        return toResponse(existingProduct);
     }
 
 
@@ -125,12 +151,46 @@ public class ProductService {
     public void deleteProductsByIds(ListProductsByIdsRequest request) {
         List<UUID> productIds = request.getProductIds();
 
+        if (productIds == null || productIds.isEmpty()) {
+            return;
+        }
+
         List<Product> products = productRepository.findAllById(productIds);
 
-        if (!products.isEmpty()) {
-            productRepository.deleteAll(products);
+        if (products.isEmpty()) {
+            return;
         }
+
+        for (Product product : products) {
+            String oldUrl = product.getThumbnailImage();
+
+            if (oldUrl != null && !oldUrl.isBlank()) {
+                String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                if (publicId != null && !publicId.isBlank()) {
+                    try {
+                        cloudinaryService.deleteAsset(publicId);
+                    }
+                    catch (IOException e) {
+                        throw new RuntimeException("Error deleting image from Cloudinary");
+                    }
+                }
+            }
+        }
+
+        // More type-safe way to delete
+        int deletedCount = entityManager.createQuery("DELETE FROM Product p WHERE p.id IN :productIds")
+                .setParameter("productIds", productIds)
+                .executeUpdate();
+
+//        String inClause = productIds.stream()
+//                .map(id -> "'" + id + "'")
+//                .collect(Collectors.joining(","));
+//        Query query = entityManager.createNativeQuery("DELETE FROM product WHERE id IN (" + inClause + ")");
+//        int deletedCount = query.executeUpdate();
+
+        log.info("Deleted {} products in a single operation", deletedCount);
     }
+
 
     public Page<?> searchProducts(ProductFilter filter, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

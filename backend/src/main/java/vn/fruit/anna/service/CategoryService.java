@@ -10,6 +10,7 @@ import vn.fruit.anna.exception.ResourceNotFoundException;
 import vn.fruit.anna.model.Category;
 import vn.fruit.anna.repository.CategoryRepository;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
     public Category createCategory(CreateCategoryRequest request, MultipartFile imageFile) {
@@ -25,10 +27,12 @@ public class CategoryService {
                 .build();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            // TODO: Upload image to cloud or local storage and get the URL
-            System.out.println("Saving category image: " + imageFile.getOriginalFilename());
-//            String imageUrl = imageStorageService.upload(imageFile);
-//            category.setThumbnailImage(imageUrl);
+            try {
+                String imageUrl = cloudinaryService.uploadImage(imageFile);
+                category.setThumbnailImage(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload category image", e);
+            }
         }
 
         return categoryRepository.save(category);
@@ -43,11 +47,24 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
 
-//        String imageUrl = imageStorageService.upload(imageFile);
-//        category.setThumbnailImage(imageUrl);
+        String oldUrl = category.getThumbnailImage();
+
+        try {
+            String newImageUrl = cloudinaryService.uploadImage(imageFile);
+            category.setThumbnailImage(newImageUrl);
+
+            if (oldUrl != null && !oldUrl.isBlank()) {
+                String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                cloudinaryService.deleteAsset(publicId);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload new category image", e);
+        }
 
         return categoryRepository.save(category);
     }
+
 
     @Transactional
     public List<Category> updateMultipleCategoryImages(List<UpdateCategoryImageRequest> requests,
@@ -61,11 +78,21 @@ public class CategoryService {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
 
-            System.out.println("image file: " + imageFile.getOriginalFilename());
+            String oldUrl = category.getThumbnailImage();
 
             if (imageFile != null && !imageFile.isEmpty()) {
-//                String imageUrl = imageStorageService.upload(imageFile);
-//                category.setThumbnailImage(imageUrl);
+                try {
+                    String imageUrl = cloudinaryService.uploadImage(imageFile);
+                    category.setThumbnailImage(imageUrl);
+
+                    if (oldUrl != null && !oldUrl.isBlank()) {
+                        String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                        cloudinaryService.deleteAsset(publicId);
+                    }
+
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Error uploading image to Cloudinary", e);
+                }
             }
 
             updatedCategories.add(category);

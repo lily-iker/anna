@@ -45,7 +45,7 @@ export default function MainNavbar() {
             {/* Social icons */}
             <div className="flex items-center space-x-2">
               <a
-                href="https://www.facebook.com/anna.vn.official"
+                href="https://www.facebook.com/hoaquaanna"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full"
@@ -53,7 +53,7 @@ export default function MainNavbar() {
                 <BsFacebook className="rounded-full size-6 bg-white text-blue-500" />
               </a>
               <a
-                href="https://zalo.me/0386236288"
+                href="https://zalo.me/g/nfvrnz306?fbclid=IwY2xjawJsriFleHRuA2FlbQIxMAABHkzonaBJU8C_MqD5q1to6ZdOAfjgt3wHyPEuEkHkfh24QO056bd8ARJu28TG_aem_MravPWLG6oUH2zbT97jnNA"
                 className="flex items-center justify-center bg-white rounded-full size-6"
                 target="_blank"
                 rel="noopener noreferrer"

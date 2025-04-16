@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import vn.fruit.anna.enums.Unit;
 
 import java.sql.Types;
@@ -45,6 +47,7 @@ public class Product extends BaseEntity {
 
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ProductImage> productImages = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

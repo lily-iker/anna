@@ -1,5 +1,6 @@
 package vn.fruit.anna.repository.specification;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import vn.fruit.anna.dto.filter.ProductFilter;
@@ -27,7 +28,20 @@ public class ProductSpecification {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("sellingPrice"), filter.getMinPrice()));
             }
             if (filter.getMaxPrice() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("sellingPrice"), filter.getMaxPrice()));
+                // Create the literal for 100 (double)
+                Expression<Double> hundred = criteriaBuilder.literal(100.0);
+
+                // Calculate discount fraction: discountPercentage / 100
+                Expression<Double> discountFraction = criteriaBuilder.quot(root.get("discountPercentage"), hundred).as(Double.class);
+
+                // Calculate 1 - (discountPercentage / 100)
+                Expression<Double> oneMinusDiscount = criteriaBuilder.diff(criteriaBuilder.literal(1.0), discountFraction);
+
+                // Calculate the discount price: sellingPrice * (1 - discountPercentage / 100)
+                Expression<Double> discountPrice = criteriaBuilder.prod(root.get("sellingPrice"), oneMinusDiscount);
+
+                // Add the condition: discount price <= maxPrice
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(discountPrice, filter.getMaxPrice()));
             }
 
             // Filter by category name

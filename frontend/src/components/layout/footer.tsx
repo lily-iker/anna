@@ -87,12 +87,24 @@ export default function Footer() {
               <li>Địa chỉ: 121 Phan Đình Giốt - La Khê - Hà Đông</li>
               <li>Hotline: 038 623 6288</li>
               <li className="flex items-center space-x-2">
-                <span>Facebook</span>
+                <a
+                  href="https://www.facebook.com/hoaquaanna"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-green-600"
+                >
+                  Facebook
+                </a>
               </li>
               <li>
-                <Link to="#" className="hover:text-green-600">
+                <a
+                  href="https://zalo.me/g/nfvrnz306?fbclid=IwY2xjawJsriFleHRuA2FlbQIxMAABHkzonaBJU8C_MqD5q1to6ZdOAfjgt3wHyPEuEkHkfh24QO056bd8ARJu28TG_aem_MravPWLG6oUH2zbT97jnNA"
+                  className="hover:text-green-600"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Zalo
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

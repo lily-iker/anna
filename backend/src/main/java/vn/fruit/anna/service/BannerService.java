@@ -9,6 +9,7 @@ import vn.fruit.anna.enums.BannerType;
 import vn.fruit.anna.model.Banner;
 import vn.fruit.anna.repository.BannerRepository;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -16,7 +17,9 @@ import java.util.List;
 public class BannerService {
 
     private final BannerRepository bannerRepository;
+    private final CloudinaryService cloudinaryService;
 
+    /** Unused methods removed for brevity **/
     public Banner createBanner(CreateBannerRequest request) {
         Banner banner = Banner.builder()
                 .title(request.getTitle())
@@ -31,14 +34,26 @@ public class BannerService {
         Banner banner = bannerRepository.findById(bannerId)
                 .orElseThrow(() -> new RuntimeException("Banner not found with ID: " + bannerId));
 
+        String oldUrl = banner.getThumbnailImage();
+
         if (imageFile != null && !imageFile.isEmpty()) {
-            // 🔁 TODO: Replace this with your actual cloud/image saving logic
-//            String imageUrl = uploadImage(imageFile);
-//            banner.setThumbnailImage(imageUrl);
+            try {
+                String uploadedUrl = cloudinaryService.uploadImage(imageFile);
+                banner.setThumbnailImage(uploadedUrl);
+
+                if (oldUrl != null && !oldUrl.isBlank()) {
+                    String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                    cloudinaryService.deleteAsset(publicId);
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload new banner image", e);
+            }
         }
 
         return bannerRepository.save(banner);
     }
+
 
     public List<Banner> getAllBanners() {
         return bannerRepository.findAll();
