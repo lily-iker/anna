@@ -18,6 +18,7 @@ export interface Product {
   minUnitToOrder: number
   createdAt: string
   updatedAt: string
+  images: string[]
   productImages: ProductImage[]
   categoryName: string
 }
@@ -57,6 +58,7 @@ export type Customer = {
   address: string
   email: string
   totalOrders: number
+  lastOrderDate: string
 }
 
 export interface OrderItem {
@@ -80,3 +82,17 @@ export interface Order {
 }
 
 export type OrderStatus = 'NEW' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
+
+export interface Feedback {
+  id: number
+  customerName: string
+  customerPhoneNumber: string
+  content: string
+  productId: string
+  productName: string
+  createdAt: string
+}
+
+export interface UpdateCategoryImageRequest {
+  categoryId: number
+}

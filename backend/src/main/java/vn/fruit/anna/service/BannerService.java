@@ -2,6 +2,8 @@ package vn.fruit.anna.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import vn.fruit.anna.dto.request.CreateBannerRequest;
 import vn.fruit.anna.enums.BannerType;
 import vn.fruit.anna.model.Banner;
@@ -24,6 +26,20 @@ public class BannerService {
         return bannerRepository.save(banner);
     }
 
+    @Transactional
+    public Banner updateBannerImage(Integer bannerId, MultipartFile imageFile) {
+        Banner banner = bannerRepository.findById(bannerId)
+                .orElseThrow(() -> new RuntimeException("Banner not found with ID: " + bannerId));
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            // 🔁 TODO: Replace this with your actual cloud/image saving logic
+//            String imageUrl = uploadImage(imageFile);
+//            banner.setThumbnailImage(imageUrl);
+        }
+
+        return bannerRepository.save(banner);
+    }
+
     public List<Banner> getAllBanners() {
         return bannerRepository.findAll();
     }
@@ -34,9 +50,5 @@ public class BannerService {
 
     public List<Banner> getAllAboutUsBanners() {
         return bannerRepository.findByBannerType(BannerType.ABOUT_US);
-    }
-
-    public List<Banner> getAllContactBanners() {
-        return bannerRepository.findByBannerType(BannerType.CONTACT);
     }
 }

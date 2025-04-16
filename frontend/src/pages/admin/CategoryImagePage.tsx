@@ -1,5 +1,3 @@
-'use client'
-
 import type React from 'react'
 
 import { useState, useEffect, useRef } from 'react'
@@ -168,7 +166,9 @@ export default function CategoryImagePage() {
                 Hình ảnh <span className="text-red-500">*</span>
               </Label>
               <div
-                ref={(el) => (dropAreaRefs.current[category.id] = el)}
+                ref={(el) => {
+                  dropAreaRefs.current[category.id] = el
+                }}
                 className="mt-1 border-2 border-dashed border-gray-300 rounded-md p-6 text-center transition-colors duration-200 cursor-pointer"
                 onClick={() => fileInputRefs.current[category.id]?.click()}
               >
@@ -193,7 +193,9 @@ export default function CategoryImagePage() {
                   </div>
                 )}
                 <input
-                  ref={(el) => (fileInputRefs.current[category.id] = el)}
+                  ref={(el) => {
+                    fileInputRefs.current[category.id] = el
+                  }}
                   id={`image-${category.id}`}
                   type="file"
                   accept="image/*"

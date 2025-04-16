@@ -3,6 +3,7 @@ package vn.fruit.anna.dto.response;
 import lombok.*;
 import vn.fruit.anna.enums.Unit;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -23,4 +24,5 @@ public class ProductResponse {
     private Integer stock;
     private Integer minUnitToOrder;
     private String categoryName;
+    List<String> images;
 }

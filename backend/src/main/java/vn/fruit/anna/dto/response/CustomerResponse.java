@@ -3,6 +3,7 @@ package vn.fruit.anna.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Builder
@@ -14,4 +15,5 @@ public class CustomerResponse {
     private String address;
     private String email;
     private Integer totalOrders;
+    private Date lastOrderDate;
 }

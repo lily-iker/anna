@@ -61,6 +61,8 @@ public class CategoryService {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
 
+            System.out.println("image file: " + imageFile.getOriginalFilename());
+
             if (imageFile != null && !imageFile.isEmpty()) {
 //                String imageUrl = imageStorageService.upload(imageFile);
 //                category.setThumbnailImage(imageUrl);

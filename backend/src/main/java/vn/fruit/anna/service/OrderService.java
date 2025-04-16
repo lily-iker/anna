@@ -27,6 +27,29 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
+//    @Transactional
+//    public Order createOrder(CreateOrderRequest request) {
+//        Customer customer = customerRepository.findById(request.getCustomerId())
+//                .orElseThrow(() -> new NotFoundException("Customer not found"));
+//        // if not found create new customer
+//
+//        Order order = Order.builder()
+//                .customer(customer)
+//                .orderDate(new Date()) // Or use createdAt if in BaseEntity
+//                .status(OrderStatus.PENDING)
+//                // ... other fields
+//                .build();
+//
+//        orderRepository.save(order);
+//
+//        // 🔄 Update customer's lastOrderDate
+//        customer.setLastOrderDate(order.getOrderDate());
+//        customer.setTotalOrders(customer.getTotalOrders() + 1);
+//        customerRepository.save(customer);
+//
+//        return order;
+//    }
+
     public OrderResponse getOrderById(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found!"));

@@ -1,24 +1,25 @@
 import { create } from 'zustand'
 import axios from '@/lib/axios-custom'
 import type { Banner } from '@/types'
+import toast from 'react-hot-toast'
 
 interface BannerStoreState {
   isLoading: boolean
   error: string | null
+  banners: Banner[]
   topBanners: Banner[]
   aboutUsBanners: Banner[]
-  contactBanners: Banner[]
   fetchTopBanners: () => Promise<void>
   fetchAboutUsBanners: () => Promise<void>
-  fetchContactBanners: () => Promise<void>
+  updateBannerImage: (bannerId: number, imageFile: File) => Promise<void | null>
 }
 
 const useBannerStore = create<BannerStoreState>((set) => ({
   isLoading: false,
   error: null,
+  banners: [],
   topBanners: [],
   aboutUsBanners: [],
-  contactBanners: [],
 
   fetchTopBanners: async () => {
     try {
@@ -42,14 +43,28 @@ const useBannerStore = create<BannerStoreState>((set) => ({
     }
   },
 
-  fetchContactBanners: async () => {
+  updateBannerImage: async (bannerId, imageFile) => {
     try {
       set({ isLoading: true, error: null })
-      const res = await axios.get('/api/banner/contact')
-      set({ contactBanners: res.data.result, isLoading: false })
+
+      const formData = new FormData()
+      formData.append('imageFile', imageFile)
+
+      await axios.put(`/api/banner/${bannerId}/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      const refreshed = await axios.get('/api/banner/all')
+      set({ banners: refreshed.data.result, isLoading: false })
+
+      toast.success('Cập nhật hình ảnh banner thành công')
     } catch (err) {
       console.error(err)
-      set({ isLoading: false, error: 'Failed to fetch contact banners' })
+      set({ isLoading: false, error: 'Không thể cập nhật hình ảnh banner' })
+      toast.error('Cập nhật hình ảnh banner thất bại')
+      return null
     }
   },
 }))

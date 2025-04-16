@@ -275,11 +275,10 @@ export default function OrderPage() {
                 <TableCell>
                   <Button
                     variant="ghost"
-                    size="sm"
                     onClick={() => navigate(`/admin/orders/edit/${order.id}`)}
-                    className="hover:cursor-pointer text-orange-500"
+                    className="hover:cursor-pointer hover:text-orange-500 text-orange-500"
                   >
-                    <Edit className="h-4 w-4 mr-1" />
+                    <Edit className="h-4 w-4" />
                     Chỉnh sửa
                   </Button>
                 </TableCell>

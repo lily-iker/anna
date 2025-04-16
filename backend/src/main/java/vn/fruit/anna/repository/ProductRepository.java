@@ -10,11 +10,13 @@ import org.springframework.stereotype.Repository;
 import vn.fruit.anna.model.Product;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     List<Product> findAllByThumbnailImageIsNotNull();
+    Optional<Product> findByNameIgnoreCase(String name);
     @Query(value = "SELECT * FROM product " +
             "ORDER BY RAND() " +
             "LIMIT 12",

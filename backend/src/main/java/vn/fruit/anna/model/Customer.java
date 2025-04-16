@@ -9,6 +9,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,9 @@ public class Customer extends BaseEntity {
     @Builder.Default
     private Integer totalOrders = 0;
 
-    @OneToMany(mappedBy = "customer")
+    private Date lastOrderDate;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
 }

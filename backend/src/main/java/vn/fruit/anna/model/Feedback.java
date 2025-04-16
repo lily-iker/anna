@@ -29,4 +29,6 @@ public class Feedback extends BaseEntity {
 
     @JdbcTypeCode(Types.VARCHAR)
     private UUID productId;
+
+    private String productName;
 }

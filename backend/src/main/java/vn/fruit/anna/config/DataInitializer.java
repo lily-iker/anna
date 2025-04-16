@@ -28,6 +28,7 @@ public class DataInitializer {
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final FeedbackRepository feedbackRepository;
 
     @PostConstruct
     public void initData() {
@@ -38,6 +39,7 @@ public class DataInitializer {
         initBlogs();
         initCustomers();
         initOrders();
+        initFeedback();
     }
 
     public void initAdminAccount() {
@@ -284,6 +286,29 @@ public class DataInitializer {
                         .build()
         );
 
+        for (Product product : products) {
+            Set<ProductImage> images = new HashSet<>();
+
+            // Add the thumbnail as first image (if exists)
+            if (product.getThumbnailImage() != null) {
+                images.add(ProductImage.builder()
+                        .image(product.getThumbnailImage())
+                        .product(product)
+                        .build());
+            }
+
+            // Add some sample images (simulate more angles or versio   ns)
+            for (int i = 1; i <= 5; i++) {
+                images.add(ProductImage.builder()
+                        .image("https://res.cloudinary.com/dschfkj54/image/upload/v1742736196/sample_" + i + ".jpg")
+                        .product(product)
+                        .build());
+            }
+
+            product.setProductImages(images); // link images to product
+        }
+
+
         productRepository.saveAll(products);
         System.out.println("✅ Products inserted.");
     }
@@ -294,60 +319,42 @@ public class DataInitializer {
         List<Banner> banners = List.of(
                 // TOP banners
                 Banner.builder()
-                        .title("Khuyến mãi mùa hè")
+                        .title("Banner top 1")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/banner_top_1_bfiwnc.jpg")
                         .bannerType(BannerType.TOP)
                         .build(),
 
                 Banner.builder()
-                        .title("Giảm giá cuối tuần")
+                        .title("Banner top 2")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818691/banner_top_2_uhp0nb.jpg")
                         .bannerType(BannerType.TOP)
                         .build(),
 
                 Banner.builder()
-                        .title("Trái cây tươi mỗi ngày")
+                        .title("Banner top 3")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
                         .bannerType(BannerType.TOP)
                         .build(),
 
                 // ABOUT_US banners
                 Banner.builder()
-                        .title("Chúng tôi là ai?")
+                        .title("Banner giới thiệu 1")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
                         .bannerType(BannerType.ABOUT_US)
                         .build(),
 
                 Banner.builder()
-                        .title("Sứ mệnh của chúng tôi")
+                        .title("Banner giới thiệu 2")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
                         .bannerType(BannerType.ABOUT_US)
                         .build(),
 
                 Banner.builder()
-                        .title("Cam kết chất lượng")
+                        .title("Banner giới thiệu 3")
                         .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742818692/%C4%91%E1%BB%83_%C4%91%C3%A2u_c%C5%A9ng_%C4%91c_k_%C4%91%E1%BB%83_c%C5%A9ng_%C4%91c_i2ddfy.jpg")
                         .bannerType(BannerType.ABOUT_US)
-                        .build(),
-
-                // CONTACT banners
-                Banner.builder()
-                        .title("Hỗ trợ 24/7")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752113/contact_1.jpg")
-                        .bannerType(BannerType.CONTACT)
-                        .build(),
-
-                Banner.builder()
-                        .title("Địa chỉ cửa hàng")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752113/contact_2.jpg")
-                        .bannerType(BannerType.CONTACT)
-                        .build(),
-
-                Banner.builder()
-                        .title("Liên hệ ngay")
-                        .thumbnailImage("https://res.cloudinary.com/dschfkj54/image/upload/v1742752113/contact_3.jpg")
-                        .bannerType(BannerType.CONTACT)
-                        .build());
+                        .build()
+                );
 
         bannerRepository.saveAll(banners);
         System.out.println("✅ Banners inserted.");
@@ -507,15 +514,15 @@ public class DataInitializer {
             return;
         }
 
-        // Possible statuses to cycle through
         OrderStatus[] statuses = OrderStatus.values();
-
         Random random = new Random();
+        List<Order> allOrders = new ArrayList<>();
 
         for (int i = 0; i < 100; i++) {
             Customer customer = customers.get(i % customers.size());
             OrderStatus status = statuses[i % statuses.length];
 
+            // Generate different delivery/order dates
             Date deliveryDate = new Date(System.currentTimeMillis() + (2 + i) * 86400000L);
             String note = "Giao đơn hàng #" + (i + 1);
 
@@ -528,12 +535,12 @@ public class DataInitializer {
 
             order = orderRepository.save(order);
 
-            int numberOfItems = 1 + random.nextInt(3); // 1 to 3 products per order
+            int numberOfItems = 1 + random.nextInt(3);
             double total = 0.0;
 
             for (int j = 0; j < numberOfItems; j++) {
                 Product product = products.get(random.nextInt(products.size()));
-                int quantity = 1 + random.nextInt(5); // 1 to 5 units
+                int quantity = 1 + random.nextInt(5);
 
                 OrderItem item = OrderItem.builder()
                         .order(order)
@@ -548,20 +555,83 @@ public class DataInitializer {
 
             order.setTotalPrice(total);
             orderRepository.save(order);
+
+            allOrders.add(order);
         }
+
         System.out.println("✅ Sample orders and order items inserted.");
 
-        Map<UUID, Long> orderCountByCustomer = orderRepository.findAll().stream()
-                .collect(Collectors.groupingBy(o -> o.getCustomer().getId(), Collectors.counting()));
+        // ➕ Update totalOrders and lastOrderDate per customer
+        Map<UUID, List<Order>> ordersByCustomer = allOrders.stream()
+                .collect(Collectors.groupingBy(o -> o.getCustomer().getId()));
 
         for (Customer customer : customers) {
-            long total = orderCountByCustomer.getOrDefault(customer.getId(), 0L);
-            customer.setTotalOrders((int) total);
+            List<Order> customerOrders = ordersByCustomer.getOrDefault(customer.getId(), new ArrayList<>());
+
+            customer.setTotalOrders(customerOrders.size());
+
+            customerOrders.stream()
+                    .max(Comparator.comparing(Order::getCreatedAt)) // Or use estimatedDeliveryDate
+                    .ifPresent(lastOrder -> customer.setLastOrderDate(lastOrder.getCreatedAt()));
         }
 
         customerRepository.saveAll(customers);
-        System.out.println("✅ Updated totalOrders for each customer.");
+        System.out.println("✅ Updated totalOrders and lastOrderDate for each customer.");
     }
 
+    private void initFeedback() {
+        if (feedbackRepository.count() > 0) {
+            System.out.println("ℹ️ Feedback already exists.");
+            return;
+        }
+
+        List<Feedback> feedbackList = List.of(
+                Feedback.builder()
+                        .customerName("Alice Nguyen")
+                        .customerPhoneNumber("0123456789")
+                        .content("This mango is so fresh and delicious!")
+                        .productId(UUID.fromString("a1a11111-bbbb-cccc-dddd-eeeeeeeeeeee"))
+                        .productName("Fresh Mango")
+                        .build(),
+                Feedback.builder()
+                        .customerName("Bao Tran")
+                        .customerPhoneNumber("0987654321")
+                        .content("Loved the dragon fruit. Will buy again!")
+                        .productId(UUID.fromString("b2b22222-cccc-dddd-eeee-ffffffffffff"))
+                        .productName("Red Dragon Fruit")
+                        .build(),
+                Feedback.builder()
+                        .customerName("Chi Pham")
+                        .customerPhoneNumber("0934567890")
+                        .content("The imported grapes were very sweet and juicy.")
+                        .productId(UUID.fromString("c3c33333-dddd-eeee-ffff-aaaaaaaaaaaa"))
+                        .productName("Imported Grapes")
+                        .build(),
+                Feedback.builder()
+                        .customerName("Duc Le")
+                        .customerPhoneNumber("0911223344")
+                        .content("Nice packaging and fast delivery.")
+                        .productId(UUID.fromString("d4d44444-eeee-ffff-aaaa-bbbbbbbbbbbb"))
+                        .productName("Fruit Gift Basket")
+                        .build(),
+                Feedback.builder()
+                        .customerName("Emily Vu")
+                        .customerPhoneNumber("0977886655")
+                        .content("The watermelon was super refreshing!")
+                        .productId(UUID.fromString("e5e55555-ffff-aaaa-bbbb-cccccccccccc"))
+                        .productName("Watermelon")
+                        .build(),
+                Feedback.builder()
+                        .customerName("Phong Tran")
+                        .customerPhoneNumber("0966998877")
+                        .content("High quality apples, will recommend to friends.")
+                        .productId(UUID.fromString("f6f66666-aaaa-bbbb-cccc-dddddddddddd"))
+                        .productName("Green Apple")
+                        .build()
+        );
+
+        feedbackRepository.saveAll(feedbackList);
+        System.out.println("✅ Feedback inserted.");
+    }
 
 }

@@ -14,11 +14,14 @@ import vn.fruit.anna.dto.filter.ProductFilter;
 import vn.fruit.anna.dto.response.ProductResponse;
 import vn.fruit.anna.model.Category;
 import vn.fruit.anna.model.Product;
+import vn.fruit.anna.model.ProductImage;
 import vn.fruit.anna.repository.CategoryRepository;
 import vn.fruit.anna.repository.ProductRepository;
 import vn.fruit.anna.repository.specification.ProductSpecification;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,6 +32,9 @@ public class ProductService {
 
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request, MultipartFile imageFile) {
+
+        Product existingProduct = productRepository.findByNameIgnoreCase(request.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Product already exists!"));
 
         Category category = categoryRepository.findByName(request.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found!"));
@@ -133,6 +139,14 @@ public class ProductService {
     }
 
     private ProductResponse toResponse(Product product) {
+        List<String> imageUrls = Optional.ofNullable(product.getProductImages())
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(ProductImage::getImage)
+                .toList();
+
+        String categoryName = product.getCategory() != null ? product.getCategory().getName() : null;
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -145,7 +159,8 @@ public class ProductService {
                 .unit(product.getUnit())
                 .stock(product.getStock())
                 .minUnitToOrder(product.getMinUnitToOrder())
-                .categoryName(product.getCategory().getName())
+                .categoryName(categoryName)
+                .images(imageUrls)
                 .build();
     }
 
