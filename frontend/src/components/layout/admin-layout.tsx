@@ -4,16 +4,19 @@ import AdminNavbar from './admin-navbar'
 import AdminSidebar from './admin-sidebar'
 import { useAuthStore } from '@/stores/useAuthStore'
 import UnauthorizedPage from '@/pages/error/UnauthorizedPage'
+import Loading from '../loading'
+import MainNavbar from './navbar'
+import Footer from './footer'
 
 export default function AdminLayout() {
   const { authUser, isLoading } = useAuthStore()
   const navigate = useNavigate()
 
-  // useEffect(() => {
-  //   if (!isLoading && authUser?.role !== 'ADMIN') {
-  //     navigate('/login')
-  //   }
-  // }, [authUser, isLoading, navigate])
+  useEffect(() => {
+    if (!isLoading && authUser && authUser.role !== 'ADMIN') {
+      navigate('/login')
+    }
+  }, [authUser, isLoading, navigate])
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -32,6 +35,20 @@ export default function AdminLayout() {
   // Close sidebar when clicking outside on mobile
   const handleOverlayClick = () => {
     setSidebarOpen(false)
+  }
+
+  if (isLoading) {
+    return <Loading />
+  }
+
+  if (authUser?.role !== 'ADMIN') {
+    return (
+      <>
+        <MainNavbar />
+        <UnauthorizedPage />
+        <Footer />
+      </>
+    )
   }
 
   return (
@@ -55,7 +72,7 @@ export default function AdminLayout() {
           <AdminSidebar />
         </div>
 
-        {/* Main content - takes full width on small screens, adjusted width on md+ */}
+        {/* Main content */}
         <div className="flex-1 overflow-auto md:pl-0 w-full">
           <main className="p-6">
             <Outlet />
