@@ -19,7 +19,7 @@ import useBlogStore from '@/stores/useBlogStore'
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { fetchProductById, isLoading, currenetProduct } = useProductStore()
+  const { fetchProductById, isLoading, currentProduct } = useProductStore()
   const { addItem } = useCartStore()
 
   const [quantity, setQuantity] = useState(1)
@@ -41,16 +41,16 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     const fetchRelatedProducts = async () => {
-      if (!currenetProduct?.categoryName) return
+      if (!currentProduct?.categoryName) return
 
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/product/search?categoryName=${currenetProduct.categoryName}&page=0&size=12`
+          `http://localhost:8080/api/product/search?categoryName=${currentProduct.categoryName}&page=0&size=12`
         )
 
         // Filter out current product if needed
         const filtered = response.data.result?.content.filter(
-          (product: Product) => product.id !== currenetProduct.id
+          (product: Product) => product.id !== currentProduct.id
         )
 
         setRelatedProducts(filtered || [])
@@ -60,7 +60,7 @@ export default function ProductDetailPage() {
     }
 
     fetchRelatedProducts()
-  }, [currenetProduct])
+  }, [currentProduct])
 
   // Embla carousel setup
   const [mainViewRef, mainEmblaApi] = useEmblaCarousel()
@@ -100,7 +100,7 @@ export default function ProductDetailPage() {
   }, [mainEmblaApi, thumbEmblaApi, onSelect])
 
   const increaseQuantity = () => {
-    if (currenetProduct && quantity < currenetProduct.stock) {
+    if (currentProduct && quantity < currentProduct.stock) {
       setQuantity(quantity + 1)
     } else {
       toast.error('Không thể thêm nữa, đã đạt số lượng tối đa')
@@ -108,7 +108,7 @@ export default function ProductDetailPage() {
   }
 
   const decreaseQuantity = () => {
-    if (currenetProduct && quantity > currenetProduct.minUnitToOrder) {
+    if (currentProduct && quantity > currentProduct.minUnitToOrder) {
       setQuantity(quantity - 1)
     } else if (quantity > 1) {
       setQuantity(quantity - 1)
@@ -120,7 +120,7 @@ export default function ProductDetailPage() {
     toast.success(`Đã thêm ${quantity} ${product.unit} ${product.name} vào giỏ hàng`)
   }
 
-  if (isLoading || !currenetProduct) {
+  if (isLoading || !currentProduct) {
     return (
       <div className="container mx-auto p-4 min-h-screen flex items-center justify-center">
         <p className="text-lg">Đang tải sản phẩm...</p>
@@ -128,39 +128,41 @@ export default function ProductDetailPage() {
     )
   }
 
-  const actualPrice = currenetProduct.sellingPrice || currenetProduct.originalPrice
-  const hasDiscount = currenetProduct.discountPercentage > 0
+  const discountPrice = Math.round(
+    currentProduct.sellingPrice * (1 - currentProduct.discountPercentage / 100)
+  )
+  const hasDiscount = currentProduct.discountPercentage > 0
 
   // Ensure thumbnail image is first in the carousel
-  const sortedImages = currenetProduct.images ? [...currenetProduct.images] : []
+  const sortedImages = currentProduct.images ? [...currentProduct.images] : []
 
   // If thumbnail exists and is in the images array, move it to the front
-  if (currenetProduct.thumbnailImage) {
+  if (currentProduct.thumbnailImage) {
     // Remove thumbnail from current position if it exists in the array
-    const thumbnailIndex = sortedImages.findIndex((img) => img === currenetProduct.thumbnailImage)
+    const thumbnailIndex = sortedImages.findIndex((img) => img === currentProduct.thumbnailImage)
     if (thumbnailIndex !== -1) {
       sortedImages.splice(thumbnailIndex, 1)
     }
 
     // Add thumbnail to the beginning of the array
-    sortedImages.unshift(currenetProduct.thumbnailImage)
+    sortedImages.unshift(currentProduct.thumbnailImage)
   }
 
   // Fallback if no images
-  const images = sortedImages.length > 0 ? sortedImages : [currenetProduct.thumbnailImage]
+  const images = sortedImages.length > 0 ? sortedImages : [currentProduct.thumbnailImage]
 
   return (
     <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 pb-8 pt-24">
       {/* Breadcrumb */}
       <nav className="flex items-center space-x-2 mb-6 text-green-600">
         <Link
-          to={`/search?category=${currenetProduct.categoryName}`}
+          to={`/search?category=${currentProduct.categoryName}`}
           className="hover:underline text-green-600"
         >
-          {currenetProduct.categoryName}
+          {currentProduct.categoryName}
         </Link>
         <span className="text-gray-500">&gt;</span>
-        <span className="text-gray-700">{currenetProduct.name}</span>
+        <span className="text-gray-700">{currentProduct.name}</span>
       </nav>
 
       {/* Main product section */}
@@ -212,14 +214,14 @@ export default function ProductDetailPage() {
 
         {/* Product Info Section */}
         <div className="space-y-6">
-          <h1 className="text-2xl font-medium text-green-600">{currenetProduct.name}</h1>
+          <h1 className="text-2xl font-medium text-green-600">{currentProduct.name}</h1>
 
           {/* Price Section */}
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-red-600">{formatCurrency(actualPrice)}</span>
+            <span className="text-2xl font-bold text-red-600">{formatCurrency(discountPrice)}</span>
             {hasDiscount && (
               <span className="text-gray-500 line-through">
-                {formatCurrency(currenetProduct.originalPrice)}
+                {formatCurrency(currentProduct.sellingPrice)}
               </span>
             )}
           </div>
@@ -243,7 +245,7 @@ export default function ProductDetailPage() {
                   variant="ghost"
                   size="sm"
                   onClick={increaseQuantity}
-                  disabled={quantity >= currenetProduct.stock}
+                  disabled={quantity >= currentProduct.stock}
                   className="px-2"
                 >
                   <Plus size={16} />
@@ -254,9 +256,9 @@ export default function ProductDetailPage() {
             {/* Stock Status */}
             <div className="flex items-center">
               <span className="w-24">Tình trạng:</span>
-              {currenetProduct.stock > 0 ? (
+              {currentProduct.stock > 0 ? (
                 <span className="text-sm text-green-600">
-                  Còn {currenetProduct.stock} {currenetProduct.unit}
+                  Còn {currentProduct.stock} {currentProduct.unit}
                 </span>
               ) : (
                 <span className="text-sm text-red-600">Hết hàng</span>
@@ -266,7 +268,7 @@ export default function ProductDetailPage() {
             {/* Origin */}
             <div className="flex items-center">
               <span className="w-24">Xuất xứ:</span>
-              <span className="text-sm">{currenetProduct.origin}</span>
+              <span className="text-sm">{currentProduct.origin}</span>
             </div>
           </div>
 
@@ -274,14 +276,14 @@ export default function ProductDetailPage() {
           <div className="flex space-x-3 pt-4">
             <Button
               className="flex-1 bg-green-600 hover:bg-green-700"
-              onClick={() => addToCart(currenetProduct)}
-              disabled={currenetProduct.stock === 0}
+              onClick={() => addToCart(currentProduct)}
+              disabled={currentProduct.stock === 0}
             >
               Thêm vào giỏ hàng
             </Button>
             <Button
               className="flex-1 bg-orange-500 hover:bg-orange-600"
-              disabled={currenetProduct.stock === 0}
+              disabled={currentProduct.stock === 0}
             >
               MUA NGAY
             </Button>
@@ -301,7 +303,7 @@ export default function ProductDetailPage() {
           <div className="bg-white p-6 border rounded-md flex-1">
             <h3 className="font-medium text-green-600 text-lg mb-4">Mô tả sản phẩm</h3>
             <div
-              dangerouslySetInnerHTML={{ __html: currenetProduct.description }}
+              dangerouslySetInnerHTML={{ __html: currentProduct.description }}
               className="prose max-w-none"
             />
           </div>

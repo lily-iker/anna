@@ -11,7 +11,7 @@ interface ProductStoreState {
   random12Products: Product[]
 
   // Pagination state
-  currenetProduct: Product | null
+  currentProduct: Product | null
   products: Product[]
   totalProducts: number
   totalPages: number
@@ -46,7 +46,7 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
   newProducts: [],
   random12Products: [],
 
-  currenetProduct: null,
+  currentProduct: null,
   products: [],
   totalProducts: 0,
   totalPages: 0,
@@ -92,7 +92,7 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
     try {
       set({ isLoading: true, error: null })
       const res = await axios.get(`/api/product/${productId}`)
-      set({ currenetProduct: res.data.result, isLoading: false })
+      set({ currentProduct: res.data.result, isLoading: false })
       return res.data.result
     } catch (err) {
       console.error(err)

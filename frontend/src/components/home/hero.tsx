@@ -82,7 +82,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                 <ResponsiveImage
                   src={item.thumbnailImage || '/placeholder.svg'}
                   alt={item.title || 'Hero banner'}
-                  aspectRatio="21/9"
+                  aspectRatio="30/9"
                   objectFit="cover"
                   className="w-full"
                 />

@@ -177,9 +177,8 @@ export default function ProductsPage() {
               <TableHead>Tên sản phẩm</TableHead>
               <TableHead>Danh mục</TableHead>
               <TableHead>Đơn vị</TableHead>
-              <TableHead>Giá gốc</TableHead>
-              <TableHead>Giá khuyến mãi</TableHead>
-              <TableHead>Tồn kho</TableHead>
+              <TableHead>Giá bán</TableHead>
+              <TableHead>Tình trạng hàng</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
@@ -204,7 +203,6 @@ export default function ProductsPage() {
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.categoryName || 'Chưa phân loại'}</TableCell>
                 <TableCell>{product.unit}</TableCell>
-                <TableCell>{formatCurrency(product.originalPrice)}</TableCell>
                 <TableCell>{formatCurrency(product.sellingPrice)}</TableCell>
                 <TableCell>{product.stock}</TableCell>
                 <TableCell>

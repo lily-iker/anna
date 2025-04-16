@@ -7,7 +7,7 @@ function LearnMore() {
       <ResponsiveImage
         src="https://res.cloudinary.com/dnvyuomtd/image/upload/v1742787800/bannerblog2_qjoqhn_uvzqab.jpg"
         alt="Anna Shop Banner"
-        aspectRatio="21/9"
+        aspectRatio="30/9"
         objectFit="cover"
       />
 

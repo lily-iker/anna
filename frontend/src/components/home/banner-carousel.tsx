@@ -96,7 +96,7 @@ export default function BannerCarousel({ items }: BannerCarouselProps) {
                     <ResponsiveImage
                       src={item.thumbnailImage || '/placeholder.svg'}
                       alt={item.title}
-                      aspectRatio="21/9"
+                      aspectRatio="30/9"
                       objectFit="cover"
                       className="w-full"
                     />

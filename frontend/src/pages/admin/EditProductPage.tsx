@@ -1,5 +1,3 @@
-'use client'
-
 import type React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -20,9 +18,12 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor'
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { currenetProduct, updateProduct, fetchProductById, deleteProducts, isLoading } =
-    useProductStore()
+  const { updateProduct, fetchProductById, deleteProducts, isLoading } = useProductStore()
   const { categories, fetchCategories } = useCategoryStore()
+
+  // Local state for current product
+  const [currentProduct, setCurrentProduct] = useState<any>(null)
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -35,40 +36,57 @@ export default function EditProductPage() {
     minUnitToOrder: 1,
     origin: '',
   })
+  const [discountPrice, setDiscountPrice] = useState<number>(0)
 
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [previewImage, setPreviewImage] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropAreaRef = useRef<HTMLDivElement>(null)
 
+  // Fetch product data when ID changes
   useEffect(() => {
-    if (id) {
-      fetchProductById(id)
+    const loadProduct = async () => {
+      if (id) {
+        try {
+          const product = await fetchProductById(id)
+          setCurrentProduct(product)
+        } catch (error) {
+          console.error('Failed to fetch product:', error)
+        }
+      }
     }
+
+    loadProduct()
     fetchCategories()
   }, [id, fetchProductById, fetchCategories])
 
+  // Update form data when current product changes
   useEffect(() => {
-    if (currenetProduct) {
+    if (currentProduct) {
       setFormData({
-        name: currenetProduct.name || '',
-        description: currenetProduct.description || '',
-        categoryName: currenetProduct.categoryName || '',
-        unit: currenetProduct.unit || '',
-        originalPrice: currenetProduct.originalPrice || 0,
-        sellingPrice: currenetProduct.sellingPrice || 0,
-        discountPercentage: currenetProduct.discountPercentage || 0,
-        stock: currenetProduct.stock || 0,
-        minUnitToOrder: currenetProduct.minUnitToOrder || 1,
-        origin: currenetProduct.origin || '',
+        name: currentProduct.name || '',
+        description: currentProduct.description || '',
+        categoryName: currentProduct.categoryName || '',
+        unit: currentProduct.unit || '',
+        originalPrice: currentProduct.originalPrice || 0,
+        sellingPrice: currentProduct.sellingPrice || 0,
+        discountPercentage: currentProduct.discountPercentage || 0,
+        stock: currentProduct.stock || 0,
+        minUnitToOrder: currentProduct.minUnitToOrder || 1,
+        origin: currentProduct.origin || '',
       })
 
+      // Calculate discount price
+      const discounted =
+        currentProduct.sellingPrice * (1 - (currentProduct.discountPercentage || 0) / 100)
+      setDiscountPrice(Number.parseFloat(discounted.toFixed(2)))
+
       // Set preview image from current product
-      if (currenetProduct.thumbnailImage) {
-        setPreviewImage(currenetProduct.thumbnailImage)
+      if (currentProduct.thumbnailImage) {
+        setPreviewImage(currentProduct.thumbnailImage)
       }
     }
-  }, [currenetProduct])
+  }, [currentProduct])
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -79,40 +97,20 @@ export default function EditProductPage() {
       numValue = 0
     }
 
-    // Special handling for discount percentage (can't exceed 100%)
+    // Clamp discount percentage to 100
     if (name === 'discountPercentage' && numValue > 100) {
       numValue = 100
     }
 
     setFormData((prev) => {
       const updatedFormData = { ...prev, [name]: numValue }
-      const originalPrice = updatedFormData.originalPrice || 0
+      const discount = updatedFormData.discountPercentage || 0
+      const sellingPrice = updatedFormData.sellingPrice || 0
 
-      // When discount percentage changes, update selling price
-      if (name === 'discountPercentage') {
-        const discount = numValue
-        const sellingPrice = originalPrice * (1 - discount / 100)
-        updatedFormData.sellingPrice = Number.parseFloat(sellingPrice.toFixed(2))
-      }
-      // When original price changes, update selling price based on current discount
-      else if (name === 'originalPrice') {
-        const discount = updatedFormData.discountPercentage
-        const sellingPrice = numValue * (1 - discount / 100)
-        updatedFormData.sellingPrice = Number.parseFloat(sellingPrice.toFixed(2))
-      }
-      // When selling price changes, update discount percentage
-      else if (name === 'sellingPrice') {
-        if (originalPrice > 0) {
-          // Calculate discount percentage based on original and selling price
-          const discount = ((originalPrice - numValue) / originalPrice) * 100
-          // Ensure discount is between 0 and 100
-          updatedFormData.discountPercentage = Number.parseFloat(
-            Math.max(0, Math.min(100, discount)).toFixed(2)
-          )
-        } else {
-          // If original price is 0, we can't calculate a discount
-          updatedFormData.discountPercentage = 0
-        }
+      if (name === 'discountPercentage' || name === 'sellingPrice') {
+        // Update discount price based on selling price and discount percentage
+        const discounted = sellingPrice * (1 - discount / 100)
+        setDiscountPrice(Number.parseFloat(discounted.toFixed(2)))
       }
 
       return updatedFormData
@@ -424,6 +422,20 @@ export default function EditProductPage() {
                 className="mt-1"
               />
             </div>
+            <div>
+              <Label className="text-sm font-medium">
+                Giá sau khi chiết khấu <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                value={discountPrice}
+                onChange={() => {}}
+                className="mt-1"
+                required
+                disabled
+              />
+            </div>
           </div>
         </div>
 
@@ -445,6 +457,7 @@ export default function EditProductPage() {
                 <SelectContent>
                   <SelectItem value="KG">KG</SelectItem>
                   <SelectItem value="Hộp">Hộp</SelectItem>
+                  <SelectItem value="Giỏ">Giỏ</SelectItem>
                 </SelectContent>
               </Select>
             </div>

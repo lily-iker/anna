@@ -9,8 +9,8 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: ProductCardProps) {
-  const isDiscounted = product.originalPrice > product.sellingPrice
-  const salePrice = product.sellingPrice
+  const isDiscounted = product.discountPercentage > 0
+  const discountPrice = Math.round(product.sellingPrice * (1 - product.discountPercentage / 100))
 
   const navigate = useNavigate()
 
@@ -43,12 +43,13 @@ function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
             <p className="text-sm text-gray-500 mb-2">Xuất xứ: {product.origin}</p>
-
             <div className="flex flex-row justify-center items-center gap-2">
-              <span className="text-red-600 text-lg font-bold">{formatCurrency(salePrice)}</span>
+              <span className="text-red-600 text-lg font-bold">
+                {formatCurrency(isDiscounted ? discountPrice : product.sellingPrice)}
+              </span>
               {isDiscounted && (
                 <span className="text-sm text-gray-400 line-through">
-                  {formatCurrency(product.originalPrice)}
+                  {formatCurrency(product.sellingPrice)}
                 </span>
               )}
             </div>
