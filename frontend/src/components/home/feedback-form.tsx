@@ -26,8 +26,8 @@ interface Product {
 export function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
   const [formState, setFormState] = useState<FormState>('form')
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
+    customerName: '',
+    customerPhoneNumber: '',
     productName: '',
     content: '',
   })
@@ -44,7 +44,7 @@ export function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.phone) newErrors.phone = 'Vui lòng nhập số điện thoại'
+    if (!formData.customerPhoneNumber) newErrors.customerPhoneNumber = 'Vui lòng nhập số điện thoại'
     if (!formData.productName) newErrors.productName = 'Vui lòng nhập tên sản phẩm'
     if (!formData.content) newErrors.content = 'Vui lòng nhập nội dung'
 
@@ -126,8 +126,8 @@ export function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      phone: '',
+      customerName: '',
+      customerPhoneNumber: '',
       productName: '',
       content: '',
     })
@@ -189,30 +189,32 @@ export function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 py-4">
               <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
+                <label htmlFor="customerName" className="text-sm font-medium">
                   Họ và tên
                 </label>
                 <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="customerName"
+                  name="customerName"
+                  value={formData.customerName}
                   onChange={handleChange}
                   className="w-full"
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
+                <label htmlFor="customerPhoneNumber" className="text-sm font-medium">
                   Số điện thoại <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
+                  id="customerPhoneNumber"
+                  name="customerPhoneNumber"
+                  value={formData.customerPhoneNumber}
                   onChange={handleChange}
-                  className={cn('w-full', errors.phone && 'border-red-500')}
+                  className={cn('w-full', errors.customerPhoneNumber && 'border-red-500')}
                 />
-                {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+                {errors.customerPhoneNumber && (
+                  <p className="text-xs text-red-500">{errors.customerPhoneNumber}</p>
+                )}
               </div>
 
               <div className="space-y-2">

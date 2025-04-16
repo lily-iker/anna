@@ -297,7 +297,7 @@ public class DataInitializer {
                         .build());
             }
 
-            // Add some sample images (simulate more angles or versio   ns)
+            // Add some sample images (simulate more angles or versions)
             for (int i = 1; i <= 5; i++) {
                 images.add(ProductImage.builder()
                         .image("https://res.cloudinary.com/dschfkj54/image/upload/v1742736196/sample_" + i + ".jpg")

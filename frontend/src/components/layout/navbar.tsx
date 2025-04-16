@@ -1,22 +1,10 @@
-'use client'
-
-import type React from 'react'
-
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import {
-  Search,
-  ShoppingCart,
-  Menu,
-  X,
-  Home,
-  BookOpen,
-  Phone,
-  LayoutGrid,
-  Facebook,
-} from 'lucide-react'
+import { Search, ShoppingCart, Menu, X, Home, BookOpen, Phone, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '../ui/input'
+import { BsFacebook } from 'react-icons/bs'
+import { SiZalo } from 'react-icons/si'
 
 export default function MainNavbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -56,19 +44,21 @@ export default function MainNavbar() {
           <div className="container mx-auto px-2 lg:px-16 flex items-center justify-between">
             {/* Social icons */}
             <div className="flex items-center space-x-2">
-              <a href="#" className="text-white hover:text-gray-200">
-                <Facebook className="h-5 w-5" />
+              <a
+                href="https://www.facebook.com/anna.vn.official"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full"
+              >
+                <BsFacebook className="rounded-full size-6 bg-white text-blue-500" />
               </a>
-              <a href="#" className="text-white hover:text-gray-200">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="white"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.5 14c0 .55-.45 1-1 1h-9c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1v-1c0-2.76 2.24-5 5-5s5 2.24 5 5v1c.55 0 1 .45 1 1v4z" />
-                </svg>
+              <a
+                href="https://zalo.me/0386236288"
+                className="flex items-center justify-center bg-white rounded-full size-6"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <SiZalo className="size-5 text-blue-500" />
               </a>
             </div>
 

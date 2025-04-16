@@ -1,3 +1,5 @@
+'use client'
+
 import type React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -385,7 +387,7 @@ export default function EditProductPage() {
                 name="originalPrice"
                 type="number"
                 min="0"
-                value={formData.originalPrice || ''}
+                value={formData.originalPrice === 0 ? '0' : formData.originalPrice || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
                 required
@@ -401,7 +403,7 @@ export default function EditProductPage() {
                 name="sellingPrice"
                 type="number"
                 min="0"
-                value={formData.sellingPrice || ''}
+                value={formData.sellingPrice === 0 ? '0' : formData.sellingPrice || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
               />
@@ -417,7 +419,7 @@ export default function EditProductPage() {
                 type="number"
                 min="0"
                 max="100"
-                value={formData.discountPercentage || ''}
+                value={formData.discountPercentage === 0 ? '0' : formData.discountPercentage || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
               />
@@ -455,7 +457,7 @@ export default function EditProductPage() {
                 id="minUnitToOrder"
                 name="minUnitToOrder"
                 type="number"
-                value={formData.minUnitToOrder || ''}
+                value={formData.minUnitToOrder === 1 ? '1' : formData.minUnitToOrder || ''}
                 onChange={handleChange}
                 min="1"
                 className="mt-1"
@@ -471,7 +473,7 @@ export default function EditProductPage() {
                 id="stock"
                 name="stock"
                 type="number"
-                value={formData.stock || ''}
+                value={formData.stock === 0 ? '0' : formData.stock || ''}
                 onChange={handleChange}
                 className="mt-1"
                 min="0"

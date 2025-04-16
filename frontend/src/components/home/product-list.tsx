@@ -16,8 +16,8 @@ interface ProductListProps {
 const MemoizedProductCard = memo(ProductCard)
 
 export default function ProductList({ title, products }: ProductListProps) {
-  // Initialize with a default, will be updated in useEffect
-  const [visibleProducts, setVisibleProducts] = useState(4)
+  // Initialize with null, will be set properly in useEffect
+  const [visibleProducts, setVisibleProducts] = useState<number | null>(null)
   const [screenSize, setScreenSize] = useState('lg')
 
   // Set initial screen size and update when window resizes
@@ -26,13 +26,13 @@ export default function ProductList({ title, products }: ProductListProps) {
       const width = window.innerWidth
       if (width >= 1024) {
         setScreenSize('lg')
-        setVisibleProducts((prev) => (prev <= 4 ? 4 : prev)) // Only reset if smaller than default
+        setVisibleProducts((prev) => (prev === null ? 4 : prev <= 4 ? 4 : prev))
       } else if (width >= 768) {
         setScreenSize('md')
-        setVisibleProducts((prev) => (prev <= 3 ? 3 : prev))
+        setVisibleProducts((prev) => (prev === null ? 3 : prev <= 3 ? 3 : prev))
       } else {
         setScreenSize('sm')
-        setVisibleProducts((prev) => (prev <= 2 ? 2 : prev))
+        setVisibleProducts((prev) => (prev === null ? 2 : prev <= 2 ? 2 : prev))
       }
     }
 
@@ -58,20 +58,26 @@ export default function ProductList({ title, products }: ProductListProps) {
 
   // Memoize the displayed products to prevent recalculation on every render
   const displayedProducts = useMemo(() => {
-    return products.slice(0, visibleProducts)
-  }, [products, visibleProducts])
+    // Default to appropriate number if visibleProducts is null
+    const count = visibleProducts ?? (screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2)
+    return products.slice(0, count)
+  }, [products, visibleProducts, screenSize])
 
   // Memoize this value to prevent recalculation on every render
   const showViewMoreButton = useMemo(() => {
-    return products.length > visibleProducts && visibleProducts < 12
-  }, [products.length, visibleProducts])
+    const count = visibleProducts ?? (screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2)
+    return products.length > count && count < 12
+  }, [products.length, visibleProducts, screenSize])
 
   const handleViewMore = () => {
     // Add products based on current screen size
     const increment = screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2
 
+    // Get current count, defaulting to screen-appropriate value if null
+    const currentCount = visibleProducts ?? (screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2)
+
     // Increase by the appropriate amount, up to a maximum of 12
-    setVisibleProducts((prev) => Math.min(prev + increment, 12))
+    setVisibleProducts(Math.min(currentCount + increment, 12))
   }
 
   return (

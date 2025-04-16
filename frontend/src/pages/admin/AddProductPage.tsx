@@ -348,7 +348,7 @@ export default function AddProductPage() {
                 name="originalPrice"
                 type="number"
                 min="0"
-                value={formData.originalPrice || ''}
+                value={formData.originalPrice === 0 ? '0' : formData.originalPrice || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
                 required
@@ -364,7 +364,7 @@ export default function AddProductPage() {
                 name="sellingPrice"
                 type="number"
                 min="0"
-                value={formData.sellingPrice || ''}
+                value={formData.sellingPrice === 0 ? '0' : formData.sellingPrice || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
               />
@@ -380,7 +380,7 @@ export default function AddProductPage() {
                 type="number"
                 min="0"
                 max="100"
-                value={formData.discountPercentage || ''}
+                value={formData.discountPercentage === 0 ? '0' : formData.discountPercentage || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
               />
@@ -434,7 +434,7 @@ export default function AddProductPage() {
                 id="stock"
                 name="stock"
                 type="number"
-                value={formData.stock || ''}
+                value={formData.stock === 0 ? '0' : formData.stock || ''}
                 onChange={handleChange}
                 className="mt-1"
                 min="0"
