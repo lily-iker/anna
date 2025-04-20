@@ -152,11 +152,11 @@ export default function HomePage() {
         </Suspense>
         <SectionDivider />
 
-        <Suspense fallback={<LearnMoreSkeleton />}>
+        {/* <Suspense fallback={<LearnMoreSkeleton />}>
           <div className="animate-fade-in">
             <LearnMore />
           </div>
-        </Suspense>
+        </Suspense> */}
       </div>
     </>
   )
