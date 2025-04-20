@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.fruit.anna.model.Product;
 
@@ -16,7 +17,8 @@ import java.util.UUID;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     List<Product> findAllByThumbnailImageIsNotNull();
-    Optional<Product> findByNameIgnoreCase(String name);
+    @Query("SELECT p FROM Product p WHERE LOWER(p.name) = LOWER(:name)")
+    Optional<Product> findByNameExactIgnoreCase(@Param("name") String name);
     @Query(value = "SELECT * FROM product " +
             "ORDER BY RAND() " +
             "LIMIT 12",

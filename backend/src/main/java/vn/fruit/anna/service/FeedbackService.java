@@ -22,8 +22,8 @@ public class FeedbackService {
 
     @Transactional
     public Feedback createFeedback(CreateFeedbackRequest request) {
-        Product existingProduct = productRepository.findByNameIgnoreCase(request.getProductName())
-                .orElseThrow(() -> new IllegalArgumentException("Product already exists!"));
+        Product existingProduct = productRepository.findByNameExactIgnoreCase(request.getProductName())
+                .orElseThrow(() -> new IllegalArgumentException("Product not exists!"));
 
         Feedback feedback = Feedback.builder()
                 .customerName(request.getCustomerName())

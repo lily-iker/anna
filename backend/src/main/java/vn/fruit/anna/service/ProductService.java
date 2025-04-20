@@ -46,8 +46,10 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request, MultipartFile imageFile) {
 
-        Product existingProduct = productRepository.findByNameIgnoreCase(request.getName())
-                .orElseThrow(() -> new IllegalArgumentException("Product already exists!"));
+        Optional<Product> existingProduct = productRepository.findByNameExactIgnoreCase(request.getName());
+        if (existingProduct.isPresent()) {
+            throw new IllegalArgumentException("Product with this name already exists!");
+        }
 
         Category category = categoryRepository.findByName(request.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found!"));
