@@ -18,12 +18,14 @@ public class CustomerController {
     public ResponseEntity<?> getAllCustomers(
             @RequestParam(required = false, defaultValue = "") String name,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "desc", required = false) String direction
     ) {
         return ResponseEntity.ok(
                 new ApiResponse<>(200,
                         "Get customers successfully",
-                        customerService.searchCustomers(name, page, size))
+                        customerService.searchCustomers(name, page, size, sortBy, direction))
         );
     }
 

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,8 +193,22 @@ public class ProductService {
     }
 
 
-    public Page<?> searchProducts(ProductFilter filter, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<?> searchProducts(ProductFilter filter, int page, int size, String sortBy, String direction) {
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        List<String> allowedSortFields = List.of("categoryName", "unit");
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt"; // fallback
+        }
+        Sort sort = Sort.by(sortDirection, sortBy);
+
+        if (sortBy.equals("categoryName")) {
+            sort = Sort.by(sortDirection, "category.name");
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         Specification<Product> spec = ProductSpecification.applyFilter(filter);
         return productRepository.findAll(spec, pageable).map(this::toResponse);
     }

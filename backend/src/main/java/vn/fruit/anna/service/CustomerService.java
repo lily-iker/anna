@@ -1,6 +1,8 @@
 package vn.fruit.anna.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.fruit.anna.dto.request.ListCustomersByIdsRequest;
@@ -18,9 +20,21 @@ import java.util.UUID;
 public class CustomerService {
     private final CustomerRepository customerRepository;
 
-    public Page<?> searchCustomers(String name, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        return customerRepository.findByNameContainingIgnoreCase(name, pageRequest).map(this::toResponse);
+    public Page<?> searchCustomers(String name, int page, int size, String sortBy, String direction) {
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        List<String> allowedSortFields = List.of("totalOrders");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt"; // fallback
+        }
+
+        Sort sort = Sort.by(sortDirection, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return customerRepository.findByNameContainingIgnoreCase(name, pageable).map(this::toResponse);
     }
 
     @Transactional

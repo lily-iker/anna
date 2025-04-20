@@ -518,11 +518,12 @@ public class DataInitializer {
         Random random = new Random();
         List<Order> allOrders = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
-            Customer customer = customers.get(i % customers.size());
-            OrderStatus status = statuses[i % statuses.length];
+        int totalOrdersToCreate = 100;
 
-            // Generate different delivery/order dates
+        for (int i = 0; i < totalOrdersToCreate; i++) {
+            Customer customer = customers.get(random.nextInt(customers.size())); // 🎯 Random customer
+            OrderStatus status = statuses[random.nextInt(statuses.length)];
+
             Date deliveryDate = new Date(System.currentTimeMillis() + (2 + i) * 86400000L);
             String note = "Giao đơn hàng #" + (i + 1);
 
@@ -571,7 +572,7 @@ public class DataInitializer {
             customer.setTotalOrders(customerOrders.size());
 
             customerOrders.stream()
-                    .max(Comparator.comparing(Order::getCreatedAt)) // Or use estimatedDeliveryDate
+                    .max(Comparator.comparing(Order::getCreatedAt))
                     .ifPresent(lastOrder -> customer.setLastOrderDate(lastOrder.getCreatedAt()));
         }
 

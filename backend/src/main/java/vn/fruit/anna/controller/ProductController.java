@@ -103,7 +103,9 @@ public class ProductController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) String categoryName
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(defaultValue = "createdAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "desc", required = false) String direction
     ) {
         ProductFilter filter = new ProductFilter();
         filter.setName(name);
@@ -114,7 +116,7 @@ public class ProductController {
         return ResponseEntity.ok(
                 new ApiResponse<>(200,
                         "Products searched successfully",
-                        productService.searchProducts(filter, page, size)));
+                        productService.searchProducts(filter, page, size, sortBy, direction)));
     }
 
 }
