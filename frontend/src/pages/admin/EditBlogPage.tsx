@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import useBlogStore from '@/stores/useBlogStore'
+import toast from 'react-hot-toast'
 
 export default function EditBlogPage() {
   const { id } = useParams<{ id: string }>()
@@ -72,6 +73,11 @@ export default function EditBlogPage() {
     const blogFormData = new FormData()
     const blogRequest = JSON.stringify(formData)
     blogFormData.append('blog', new Blob([blogRequest], { type: 'application/json' }))
+
+    if (formData.content.replace(/<[^>]*>/g, '').trim() === '') {
+      toast.error('Vui lòng nhập nội dung cho bài viết')
+      return
+    }
 
     if (imageFile) {
       blogFormData.append('imageFile', imageFile)

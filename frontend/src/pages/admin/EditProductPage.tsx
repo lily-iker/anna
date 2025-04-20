@@ -14,6 +14,7 @@ import {
 import useProductStore from '@/stores/useProductStore'
 import useCategoryStore from '@/stores/useCategoryStore'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import toast from 'react-hot-toast'
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>()
@@ -174,6 +175,11 @@ export default function EditProductPage() {
       // Add product data as JSON
       const productRequest = JSON.stringify(formData)
       productFormData.append('product', new Blob([productRequest], { type: 'application/json' }))
+
+      if (formData.description.replace(/<[^>]*>/g, '').trim() === '') {
+        toast.error('Vui lòng nhập mô tả sản phẩm')
+        return
+      }
 
       // Add image file if a new one was selected
       if (imageFile) {

@@ -125,6 +125,11 @@ export default function AddProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (formData.description.replace(/<[^>]*>/g, '').trim() === '') {
+      toast.error('Vui lòng nhập mô tả sản phẩm')
+      return
+    }
+
     if (!imageFile) {
       toast.error('Vui lòng tải lên hình ảnh sản phẩm')
       return

@@ -48,6 +48,11 @@ export default function AddBlogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (formData.content.replace(/<[^>]*>/g, '').trim() === '') {
+      toast.error('Vui lòng nhập nội dung cho bài viết')
+      return
+    }
+
     if (!imageFile) {
       toast.error('Vui lòng tải lên hình ảnh cho bài viết')
       return
