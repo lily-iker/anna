@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import toast from 'react-hot-toast'
 
 interface FeedbackFormProps {
   isOpen: boolean
@@ -40,17 +41,6 @@ export function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
   const [isLoadingProducts, setIsLoadingProducts] = useState(false)
   const [openProductSearch, setOpenProductSearch] = useState(false)
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.customerPhoneNumber) newErrors.customerPhoneNumber = 'Vui lòng nhập số điện thoại'
-    if (!formData.productName) newErrors.productName = 'Vui lòng nhập tên sản phẩm'
-    if (!formData.content) newErrors.content = 'Vui lòng nhập nội dung'
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -113,7 +103,25 @@ export function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateForm()) return
+    if (formData.customerPhoneNumber.trim() === '') {
+      toast.error('Vui lòng nhập số điện thoại')
+      return
+    }
+
+    if (!/^\d{10,11}$/.test(formData.customerPhoneNumber)) {
+      toast.error('Số điện thoại không hợp lệ')
+      return
+    }
+
+    if (formData.productName.trim() === '') {
+      toast.error('Vui lòng nhập tên sản phẩm')
+      return
+    }
+
+    if (formData.content.trim() === '') {
+      toast.error('Vui lòng nhập nội dung góp ý')
+      return
+    }
 
     try {
       await axios.post('/api/feedback/create', formData)
