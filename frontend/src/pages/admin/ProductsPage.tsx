@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit, Search } from 'lucide-react'
+import { ChevronDown, Edit, Search } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { Pagination } from '@/components/ui/pagination'
 import useProductStore from '@/stores/useProductStore'
@@ -48,14 +48,19 @@ export default function ProductsPage() {
 
   // Pagination state
   const [pageSizeOptions] = useState([1, 5, 10, 20])
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDirection, setSortDirection] = useState('desc')
 
   useEffect(() => {
     fetchCategories()
   }, [fetchCategories])
 
   useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts])
+    fetchProducts({
+      sortBy,
+      direction: sortDirection,
+    })
+  }, [fetchProducts, sortBy, sortDirection])
 
   // Handle search and filter submission
   const handleSearch = () => {
@@ -63,6 +68,8 @@ export default function ProductsPage() {
     fetchProducts({
       page: 1,
       name: searchTerm,
+      sortBy,
+      direction: sortDirection,
     })
   }
 
@@ -70,14 +77,23 @@ export default function ProductsPage() {
     (page: number) => {
       // Only fetch if the requested page is different from the current page
       if (page !== currentPage) {
-        fetchProducts({ page })
+        fetchProducts({
+          page,
+          sortBy,
+          direction: sortDirection,
+        })
       }
     },
-    [currentPage, fetchProducts]
+    [currentPage, fetchProducts, sortBy, sortDirection]
   )
 
   const handlePageSizeChange = (size: string) => {
-    fetchProducts({ page: 1, size: Number.parseInt(size) })
+    fetchProducts({
+      page: 1,
+      size: Number.parseInt(size),
+      sortBy,
+      direction: sortDirection,
+    })
   }
 
   const handleSelectAll = () => {
@@ -103,6 +119,26 @@ export default function ProductsPage() {
     }
   }
 
+  const handleSort = (column: string) => {
+    // If clicking the same column, toggle direction
+    if (sortBy === column) {
+      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+      setSortDirection(newDirection)
+      fetchProducts({
+        sortBy: column,
+        direction: newDirection,
+      })
+    } else {
+      // New column, default to ascending
+      setSortBy(column)
+      setSortDirection('asc')
+      fetchProducts({
+        sortBy: column,
+        direction: 'asc',
+      })
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -120,7 +156,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Results per page selector */}
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           Hiển thị {products.length} / {totalProducts} sản phẩm
         </div>
@@ -140,7 +176,7 @@ export default function ProductsPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       {/* Products Table with optimistic UI */}
       <div className="border rounded-md relative">
@@ -175,10 +211,39 @@ export default function ProductsPage() {
               </TableHead>
               <TableHead className="w-16">Ảnh</TableHead>
               <TableHead>Tên sản phẩm</TableHead>
-              <TableHead>Danh mục</TableHead>
-              <TableHead>Đơn vị</TableHead>
-              <TableHead>Giá bán</TableHead>
-              <TableHead>Tình trạng hàng</TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => handleSort('categoryName')}
+              >
+                <div className="flex items-center">
+                  Danh mục
+                  <ChevronDown
+                    className={`ml-1 h-4 w-4 transition-opacity ${
+                      sortBy === 'categoryName'
+                        ? 'opacity-100 rotate-0'
+                        : 'opacity-50 group-hover:opacity-100'
+                    } ${sortBy === 'categoryName' && sortDirection === 'asc' ? 'rotate-180' : ''}`}
+                  />
+                </div>
+              </TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => handleSort('unit')}
+              >
+                <div className="flex items-center">
+                  Đơn vị
+                  <ChevronDown
+                    className={`ml-1 h-4 w-4 transition-opacity ${
+                      sortBy === 'unit'
+                        ? 'opacity-100 rotate-0'
+                        : 'opacity-50 group-hover:opacity-100'
+                    } ${sortBy === 'unit' && sortDirection === 'asc' ? 'rotate-180' : ''}`}
+                  />
+                </div>
+              </TableHead>
+              <TableHead className="text-center">Giá bán</TableHead>
+              <TableHead className="text-center">Giá chiết khấu</TableHead>
+              <TableHead className="text-center">Tình trạng hàng</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
@@ -203,8 +268,20 @@ export default function ProductsPage() {
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.categoryName || 'Chưa phân loại'}</TableCell>
                 <TableCell>{product.unit}</TableCell>
-                <TableCell>{formatCurrency(product.sellingPrice)}</TableCell>
-                <TableCell>{product.stock}</TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(product.sellingPrice)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(
+                    Number.parseFloat(
+                      (
+                        product.sellingPrice *
+                        (1 - (product.discountPercentage || 0) / 100)
+                      ).toFixed(2)
+                    )
+                  )}
+                </TableCell>
+                <TableCell className="text-center">{product.stock}</TableCell>
                 <TableCell>
                   <Button
                     variant="ghost"

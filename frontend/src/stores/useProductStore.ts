@@ -115,6 +115,8 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
       const maxPrice = params?.maxPrice !== undefined ? params.maxPrice : state.maxPrice
       const categoryName =
         params?.categoryName !== undefined ? params.categoryName : state.categoryName
+      const sortBy = params?.sortBy !== undefined ? params.sortBy : 'createdAt'
+      const direction = params?.direction !== undefined ? params.direction : 'desc'
 
       // Spring Boot expects 0-based page index
       const response = await axios.get<ApiResponse>('/api/product/search', {
@@ -125,6 +127,8 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
           minPrice,
           maxPrice,
           categoryName,
+          sortBy,
+          direction,
         },
       })
 

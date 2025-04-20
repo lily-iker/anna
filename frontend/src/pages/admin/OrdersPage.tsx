@@ -181,7 +181,7 @@ export default function OrderPage() {
 
       {/* Order status tabs */}
       <div className="w-full overflow-x-auto">
-        <div className="flex justify-center">
+        <div className="flex md:justify-center ">
           <div className="inline-flex gap-2 rounded-md p-2 border min-w-max">
             {[
               { key: null, label: 'Tất cả', color: 'bg-gray-200 text-gray-600' },
@@ -209,7 +209,7 @@ export default function OrderPage() {
       </div>
 
       {/* Results per page selector */}
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           Hiển thị {orders.length} / {totalOrders} đơn hàng
         </div>
@@ -229,7 +229,7 @@ export default function OrderPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       {/* Orders Table */}
       <div className="border rounded-md relative">

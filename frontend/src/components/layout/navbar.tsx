@@ -174,7 +174,7 @@ export default function MainNavbar() {
             </Button>
           </div>
 
-          <form onSubmit={handleSearch} className="relative mb-6">
+          <form onSubmit={handleSearch} className="relative mb-10">
             <Input
               placeholder="Tìm kiếm sản phẩm..."
               className="w-full py-1.5 px-3 pr-10 rounded-md border border-gray-300 text-sm"
@@ -189,7 +189,7 @@ export default function MainNavbar() {
             </button>
           </form>
 
-          <nav className="flex flex-col space-y-4">
+          <nav className="flex flex-col space-y-4 gap-2">
             <Link
               to="/"
               className="flex items-center gap-3 text-gray-700 hover:text-green-600 font-medium"
@@ -229,6 +229,14 @@ export default function MainNavbar() {
               <ShoppingCart className="h-5 w-5" />
               Giỏ hàng
             </Button>
+            {/* Contact info */}
+            <div className="mt-6">
+              <div className="text-lg font-semibold text-gray-700">Thời gian mở cửa</div>
+              <div className="text-sm text-gray-600">8:00 - 21:00</div>
+
+              <div className="mt-4 text-lg font-semibold text-gray-700">Liên hệ</div>
+              <div className="text-sm text-gray-600">097 828 6789</div>
+            </div>
           </nav>
         </div>
       </div>

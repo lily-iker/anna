@@ -210,7 +210,7 @@ export default function SearchProductPage() {
       />
 
       {/* Results per page selector */}
-      <div className="flex justify-between items-center mt-4 mb-4">
+      {/* <div className="flex justify-between items-center mt-4 mb-4">
         <div className="text-sm text-gray-500">
           Hiển thị {products.length} / {totalProducts} sản phẩm
         </div>
@@ -235,7 +235,7 @@ export default function SearchProductPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       {/* Products Grid with loading state */}
       <div className="relative border rounded-md">

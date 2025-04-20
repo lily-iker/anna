@@ -112,7 +112,7 @@ export default function FeedbackPage() {
       </div>
 
       {/* Results per page selector */}
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           Hiển thị {feedbacks.length} / {totalFeedbacks} góp ý
         </div>
@@ -132,7 +132,7 @@ export default function FeedbackPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       {/* Feedbacks Table */}
       <div className="border rounded-md relative">

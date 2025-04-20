@@ -120,6 +120,16 @@ export default function EditProductPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
+    if (name === 'origin') {
+      // Remove any numbers from the input
+      const filteredValue = value.replace(/[0-9]/g, '')
+      setFormData((prev) => ({
+        ...prev,
+        [name]: filteredValue,
+      }))
+      return
+    }
+
     // Add validation for stock and minUnitToOrder
     if (name === 'stock' && Number(value) < 0) {
       return // Don't update if stock is negative

@@ -41,7 +41,10 @@ const ResponsiveImage = memo(
     }
 
     return (
-      <div className={`relative overflow-hidden ${className}`} style={{ aspectRatio }}>
+      <div
+        className={`relative overflow-hidden ${className}`}
+        style={{ aspectRatio, minHeight: '200px' }}
+      >
         <img
           src={imgSrc || '/placeholder.svg'}
           alt={alt}

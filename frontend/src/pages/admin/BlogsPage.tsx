@@ -108,7 +108,7 @@ export default function BlogsPage() {
       </div>
 
       {/* Results per page selector */}
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           Hiển thị {blogs.length} / {totalBlogs} bài viết
         </div>
@@ -128,7 +128,7 @@ export default function BlogsPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       {/* Blogs Table */}
       <div className="border rounded-md relative">

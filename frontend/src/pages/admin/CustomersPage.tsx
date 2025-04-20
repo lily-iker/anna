@@ -1,6 +1,5 @@
-'use client'
-
 import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Table,
   TableBody,
@@ -12,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Search } from 'lucide-react'
+import { ChevronDown, Edit, Search } from 'lucide-react'
 import { Pagination } from '@/components/ui/pagination'
 import useCustomerStore from '@/stores/useCustomerStore'
 import {
@@ -24,7 +23,8 @@ import {
 } from '@/components/ui/select'
 import { formatDate } from '@/lib/format'
 
-export default function CustomerPage() {
+export default function CustomersPage() {
+  const navigate = useNavigate()
   const {
     customers,
     totalPages,
@@ -43,17 +43,24 @@ export default function CustomerPage() {
 
   // Pagination state
   const [pageSizeOptions] = useState([1, 5, 10, 20])
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDirection, setSortDirection] = useState('desc')
 
   useEffect(() => {
-    fetchCustomers()
-  }, [fetchCustomers])
+    fetchCustomers({
+      sortBy,
+      direction: sortDirection,
+    })
+  }, [fetchCustomers, sortBy, sortDirection])
 
-  // Handle search submission
+  // Handle search and filter submission
   const handleSearch = () => {
     setSearchName(searchTerm)
     fetchCustomers({
-      name: searchTerm,
       page: 1,
+      name: searchTerm,
+      sortBy,
+      direction: sortDirection,
     })
   }
 
@@ -61,14 +68,23 @@ export default function CustomerPage() {
     (page: number) => {
       // Only fetch if the requested page is different from the current page
       if (page !== currentPage) {
-        fetchCustomers({ page })
+        fetchCustomers({
+          page,
+          sortBy,
+          direction: sortDirection,
+        })
       }
     },
-    [currentPage, fetchCustomers]
+    [currentPage, fetchCustomers, sortBy, sortDirection]
   )
 
   const handlePageSizeChange = (size: string) => {
-    fetchCustomers({ page: 1, size: Number.parseInt(size) })
+    fetchCustomers({
+      page: 1,
+      size: Number.parseInt(size),
+      sortBy,
+      direction: sortDirection,
+    })
   }
 
   const handleSelectAll = () => {
@@ -94,6 +110,26 @@ export default function CustomerPage() {
     }
   }
 
+  const handleSort = (column: string) => {
+    // If clicking the same column, toggle direction
+    if (sortBy === column) {
+      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+      setSortDirection(newDirection)
+      fetchCustomers({
+        sortBy: column,
+        direction: newDirection,
+      })
+    } else {
+      // New column, default to ascending
+      setSortBy(column)
+      setSortDirection('asc')
+      fetchCustomers({
+        sortBy: column,
+        direction: 'asc',
+      })
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -110,7 +146,7 @@ export default function CustomerPage() {
       </div>
 
       {/* Results per page selector */}
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           Hiển thị {customers.length} / {totalCustomers} khách hàng
         </div>
@@ -130,7 +166,7 @@ export default function CustomerPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       {/* Customers Table with optimistic UI */}
       <div className="border rounded-md relative">
@@ -167,8 +203,22 @@ export default function CustomerPage() {
               <TableHead>Email</TableHead>
               <TableHead>Địa chỉ</TableHead>
               <TableHead>Số điện thoại</TableHead>
-              <TableHead>Số đơn hàng đã mua</TableHead>
-              <TableHead>Thời gian đơn hàng mua gần nhất</TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => handleSort('totalOrders')}
+              >
+                <div className="flex items-center">
+                  Số đơn hàng đã mua
+                  <ChevronDown
+                    className={`ml-1 h-4 w-4 transition-opacity ${
+                      sortBy === 'totalOrders'
+                        ? 'opacity-100 rotate-0'
+                        : 'opacity-50 group-hover:opacity-100'
+                    } ${sortBy === 'totalOrders' && sortDirection === 'asc' ? 'rotate-180' : ''}`}
+                  />
+                </div>
+              </TableHead>{' '}
+              <TableHead className="text-center">Thời gian đơn hàng mua gần nhất</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -184,8 +234,10 @@ export default function CustomerPage() {
                 <TableCell>{customer.email}</TableCell>
                 <TableCell>{customer.address}</TableCell>
                 <TableCell>{customer.phoneNumber}</TableCell>
-                <TableCell>{customer.totalOrders}</TableCell>
-                <TableCell className="p-4">{formatDate(customer.lastOrderDate)}</TableCell>
+                <TableCell className="text-center">{customer.totalOrders}</TableCell>
+                <TableCell className="text-center p-4">
+                  {formatDate(customer.lastOrderDate)}
+                </TableCell>
               </TableRow>
             ))}
 

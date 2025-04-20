@@ -19,13 +19,13 @@ export default function RelatedProducts({ products }: RelatedProductsProps) {
       const width = window.innerWidth
       if (width >= 1024) {
         setScreenSize('lg')
-        setVisibleCount((prev) => (prev === null ? 4 : prev <= 4 ? 4 : prev))
+        setVisibleCount((prev) => (prev === null ? 8 : prev <= 8 ? 8 : prev))
       } else if (width >= 768) {
         setScreenSize('md')
-        setVisibleCount((prev) => (prev === null ? 3 : prev <= 3 ? 3 : prev))
+        setVisibleCount((prev) => (prev === null ? 6 : prev <= 6 ? 6 : prev))
       } else {
         setScreenSize('sm')
-        setVisibleCount((prev) => (prev === null ? 2 : prev <= 2 ? 2 : prev))
+        setVisibleCount((prev) => (prev === null ? 4 : prev <= 4 ? 4 : prev))
       }
     }
 
@@ -46,20 +46,20 @@ export default function RelatedProducts({ products }: RelatedProductsProps) {
 
   const displayedProducts = useMemo(() => {
     // Default to appropriate number if visibleCount is null
-    const count = visibleCount ?? (screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2)
+    const count = visibleCount ?? (screenSize === 'lg' ? 8 : screenSize === 'md' ? 6 : 4)
     return products.slice(0, count)
   }, [products, visibleCount, screenSize])
 
   const showViewMore = useMemo(() => {
-    const count = visibleCount ?? (screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2)
+    const count = visibleCount ?? (screenSize === 'lg' ? 8 : screenSize === 'md' ? 6 : 4)
     return products.length > count && count < 12
   }, [products.length, visibleCount, screenSize])
 
   const handleViewMore = () => {
-    const increment = screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2
+    const increment = screenSize === 'lg' ? 8 : screenSize === 'md' ? 6 : 4
 
     // Get current count, defaulting to screen-appropriate value if null
-    const currentCount = visibleCount ?? (screenSize === 'lg' ? 4 : screenSize === 'md' ? 3 : 2)
+    const currentCount = visibleCount ?? (screenSize === 'lg' ? 8 : screenSize === 'md' ? 6 : 4)
 
     setVisibleCount(Math.min(currentCount + increment, 12))
   }

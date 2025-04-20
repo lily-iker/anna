@@ -17,7 +17,8 @@ export interface ProductPaginationParams {
   minPrice?: number
   maxPrice?: number
   categoryName?: string
-  sort?: string
+  sortBy: string
+  direction: string
 }
 
 export interface OrderPaginationParams {

@@ -14,7 +14,13 @@ interface CustomerStoreState {
   searchName: string
 
   setSearchName: (name: string) => void
-  fetchCustomers: (params?: { name?: string; page?: number; size?: number }) => Promise<void>
+  fetchCustomers: (params?: {
+    name?: string
+    page?: number
+    size?: number
+    sortBy?: string
+    direction?: string
+  }) => Promise<void>
   deleteCustomers: (ids: string[]) => Promise<void>
 }
 
@@ -39,12 +45,16 @@ const useCustomerStore = create<CustomerStoreState>((set, get) => ({
       const page = params?.page ?? state.currentPage
       const size = params?.size ?? state.pageSize
       const name = params?.name ?? state.searchName
+      const sortBy = params?.sortBy ?? 'createdAt'
+      const direction = params?.direction ?? 'desc'
 
       const res = await axios.get('/api/customer/search', {
         params: {
           name,
           page: page - 1, // Convert to 0-based index
           size,
+          sortBy,
+          direction,
         },
       })
 
