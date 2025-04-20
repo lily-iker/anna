@@ -176,14 +176,64 @@ export default function EditProductPage() {
       const productRequest = JSON.stringify(formData)
       productFormData.append('product', new Blob([productRequest], { type: 'application/json' }))
 
+      if (formData.name === '') {
+        toast.error('Vui lòng nhập tên sản phẩm')
+        return
+      }
+
+      if (formData.categoryName === '') {
+        toast.error('Vui lòng chọn danh mục sản phẩm')
+        return
+      }
+
       if (formData.description.replace(/<[^>]*>/g, '').trim() === '') {
         toast.error('Vui lòng nhập mô tả sản phẩm')
         return
       }
 
-      // Add image file if a new one was selected
-      if (imageFile) {
-        productFormData.append('imageFile', imageFile)
+      if (formData.unit === '') {
+        toast.error('Vui lòng chọn đơn vị sản phẩm')
+        return
+      }
+
+      if (formData.originalPrice <= 0) {
+        toast.error('Vui lòng nhập giá nhập sản phẩm')
+        return
+      }
+
+      if (formData.sellingPrice <= 0) {
+        toast.error('Vui lòng nhập giá bán sản phẩm')
+        return
+      }
+
+      if (formData.discountPercentage < 0) {
+        toast.error('Phần trăm triết khấu không được âm')
+        return
+      }
+
+      if (formData.stock < 0) {
+        toast.error('Tình trạng hàng không được âm')
+        return
+      }
+
+      if (formData.minUnitToOrder < 1) {
+        toast.error('Điều kiện đặt hàng không được nhỏ hơn 1')
+        return
+      }
+
+      if (formData.origin === '') {
+        toast.error('Vui lòng nhập xuất xứ sản phẩm')
+        return
+      }
+
+      if (formData.discountPercentage > 100) {
+        toast.error('Phần trăm triết khấu không được lớn hơn 100')
+        return
+      }
+
+      if (!imageFile) {
+        toast.error('Vui lòng tải lên hình ảnh sản phẩm')
+        return
       }
 
       const result = await updateProduct(id, productFormData)
@@ -394,7 +444,7 @@ export default function EditProductPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="originalPrice" className="text-sm font-medium">
-                Giá gốc <span className="text-red-500">*</span>
+                Giá nhập <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="originalPrice"

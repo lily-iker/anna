@@ -74,13 +74,29 @@ export default function EditBlogPage() {
     const blogRequest = JSON.stringify(formData)
     blogFormData.append('blog', new Blob([blogRequest], { type: 'application/json' }))
 
+    if (!formData.title.trim()) {
+      toast.error('Vui lòng nhập tiêu đề cho bài viết')
+      return
+    }
+
+    if (!formData.sapo.trim()) {
+      toast.error('Vui lòng nhập tóm tắt cho bài viết')
+      return
+    }
+
     if (formData.content.replace(/<[^>]*>/g, '').trim() === '') {
       toast.error('Vui lòng nhập nội dung cho bài viết')
       return
     }
 
-    if (imageFile) {
-      blogFormData.append('imageFile', imageFile)
+    if (!formData.author.trim()) {
+      toast.error('Vui lòng nhập tên tác giả cho bài viết')
+      return
+    }
+
+    if (!imageFile) {
+      toast.error('Vui lòng tải lên hình ảnh cho bài viết')
+      return
     }
 
     const result = await updateBlog(id, blogFormData)

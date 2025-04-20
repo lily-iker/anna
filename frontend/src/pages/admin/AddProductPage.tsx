@@ -125,8 +125,58 @@ export default function AddProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (formData.name.trim() === '') {
+      toast.error('Vui lòng nhập tên sản phẩm')
+      return
+    }
+
+    if (formData.categoryName.trim() === '') {
+      toast.error('Vui lòng chọn danh mục sản phẩm')
+      return
+    }
+
     if (formData.description.replace(/<[^>]*>/g, '').trim() === '') {
       toast.error('Vui lòng nhập mô tả sản phẩm')
+      return
+    }
+
+    if (formData.unit === '') {
+      toast.error('Vui lòng chọn đơn vị sản phẩm')
+      return
+    }
+
+    if (formData.originalPrice <= 0) {
+      toast.error('Vui lòng nhập giá nhập sản phẩm')
+      return
+    }
+
+    if (formData.sellingPrice <= 0) {
+      toast.error('Vui lòng nhập giá bán sản phẩm')
+      return
+    }
+
+    if (formData.discountPercentage < 0) {
+      toast.error('Phần trăm triết khấu không được âm')
+      return
+    }
+
+    if (formData.stock < 0) {
+      toast.error('Tình trạng hàng không được âm')
+      return
+    }
+
+    if (formData.minUnitToOrder < 1) {
+      toast.error('Điều kiện đặt hàng không được nhỏ hơn 1')
+      return
+    }
+
+    if (formData.origin.trim() === '') {
+      toast.error('Vui lòng nhập xuất xứ sản phẩm')
+      return
+    }
+
+    if (formData.discountPercentage > 100) {
+      toast.error('Phần trăm triết khấu không được lớn hơn 100')
       return
     }
 
@@ -252,7 +302,6 @@ export default function AddProductPage() {
                 value={formData.name}
                 onChange={handleChange}
                 className="mt-1"
-                required
               />
             </div>
 
@@ -347,7 +396,6 @@ export default function AddProductPage() {
                 value={formData.originalPrice === 0 ? '0' : formData.originalPrice || ''}
                 onChange={handlePriceChange}
                 className="mt-1"
-                required
               />
             </div>
 
@@ -391,7 +439,6 @@ export default function AddProductPage() {
                 value={discountPrice === 0 ? '0' : discountPrice}
                 onChange={() => {}}
                 className="mt-1"
-                required
                 disabled
               />
             </div>
@@ -433,7 +480,6 @@ export default function AddProductPage() {
                 onChange={handleChange}
                 min="1"
                 className="mt-1"
-                required
               />
             </div>
 
@@ -449,7 +495,6 @@ export default function AddProductPage() {
                 onChange={handleChange}
                 className="mt-1"
                 min="0"
-                required
               />
             </div>
 
@@ -463,7 +508,6 @@ export default function AddProductPage() {
                 value={formData.origin}
                 onChange={handleChange}
                 className="mt-1"
-                required
               />
             </div>
           </div>

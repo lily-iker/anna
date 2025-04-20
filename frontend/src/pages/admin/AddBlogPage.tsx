@@ -48,8 +48,23 @@ export default function AddBlogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!formData.title.trim()) {
+      toast.error('Vui lòng nhập tiêu đề cho bài viết')
+      return
+    }
+
+    if (!formData.sapo.trim()) {
+      toast.error('Vui lòng nhập tóm tắt cho bài viết')
+      return
+    }
+
     if (formData.content.replace(/<[^>]*>/g, '').trim() === '') {
       toast.error('Vui lòng nhập nội dung cho bài viết')
+      return
+    }
+
+    if (!formData.author.trim()) {
+      toast.error('Vui lòng nhập tên tác giả cho bài viết')
       return
     }
 
