@@ -231,9 +231,8 @@ export default function EditProductPage() {
         return
       }
 
-      if (!imageFile) {
-        toast.error('Vui lòng tải lên hình ảnh sản phẩm')
-        return
+      if (imageFile) {
+        productFormData.append('imageFile', imageFile)
       }
 
       const result = await updateProduct(id, productFormData)

@@ -94,9 +94,8 @@ export default function EditBlogPage() {
       return
     }
 
-    if (!imageFile) {
-      toast.error('Vui lòng tải lên hình ảnh cho bài viết')
-      return
+    if (imageFile) {
+      blogFormData.append('imageFile', imageFile)
     }
 
     const result = await updateBlog(id, blogFormData)
