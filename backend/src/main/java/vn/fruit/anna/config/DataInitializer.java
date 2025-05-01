@@ -96,7 +96,7 @@ public class DataInitializer {
                         .originalPrice(250000.0)
                         .sellingPrice(250000.0)
                         .discountPercentage(0.0)
-                        .unit(Unit.Hộp)
+                        .unit(Unit.Giỏ)
                         .stock(20)
                         .minUnitToOrder(1)
                         .thumbnailImage(null)
@@ -287,7 +287,7 @@ public class DataInitializer {
         );
 
         for (Product product : products) {
-            Set<ProductImage> images = new HashSet<>();
+            List<ProductImage> images = new ArrayList<>();
 
             // Add the thumbnail as first image (if exists)
             if (product.getThumbnailImage() != null) {

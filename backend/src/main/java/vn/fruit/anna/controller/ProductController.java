@@ -12,6 +12,7 @@ import vn.fruit.anna.dto.request.ListProductsByIdsRequest;
 import vn.fruit.anna.dto.response.ApiResponse;
 import vn.fruit.anna.service.ProductService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,24 +25,27 @@ public class ProductController {
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @RequestPart("product") @Valid CreateProductRequest request,
-            @RequestPart("imageFile") MultipartFile imageFile
+            @RequestPart("thumbnailImageFile") MultipartFile thumbnailImageFile,
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) {
         return ResponseEntity.ok(
                 new ApiResponse<>(201,
                         "Create product success",
-                        productService.createProduct(request, imageFile)));
+                        productService.createProduct(request, thumbnailImageFile, imageFiles)));
     }
 
     @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProduct(
             @PathVariable("id") UUID id,
             @RequestPart("product") @Valid CreateProductRequest request,
-            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile
+            @RequestPart(value = "thumbnailImageFile", required = false) MultipartFile thumbnailImageFile,
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) {
         return ResponseEntity.ok(
                 new ApiResponse<>(200,
                         "Update product success",
-                        productService.updateProduct(id, request, imageFile)));
+                        productService.updateProduct(id, request, thumbnailImageFile, imageFiles))
+        );
     }
 
     @GetMapping("/{id}")

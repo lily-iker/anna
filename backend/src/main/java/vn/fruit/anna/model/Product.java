@@ -48,7 +48,7 @@ public class Product extends BaseEntity {
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ProductImage> productImages = new HashSet<>();
+    private List<ProductImage> productImages = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

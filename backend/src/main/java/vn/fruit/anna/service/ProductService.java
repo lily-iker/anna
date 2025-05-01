@@ -25,10 +25,7 @@ import vn.fruit.anna.repository.ProductRepository;
 import vn.fruit.anna.repository.specification.ProductSpecification;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,7 +41,9 @@ public class ProductService {
     private final CloudinaryService cloudinaryService;
 
     @Transactional
-    public ProductResponse createProduct(CreateProductRequest request, MultipartFile imageFile) {
+    public ProductResponse createProduct(CreateProductRequest request,
+                                         MultipartFile thumbnailImageFile,
+                                         List<MultipartFile> imageFiles) {
 
         Optional<Product> existingProduct = productRepository.findByNameExactIgnoreCase(request.getName());
         if (existingProduct.isPresent()) {
@@ -54,7 +53,6 @@ public class ProductService {
         Category category = categoryRepository.findByName(request.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found!"));
 
-        // Build Product from the request
         Product product = Product.builder()
                 .name(request.getName())
                 .origin(request.getOrigin())
@@ -68,25 +66,43 @@ public class ProductService {
                 .category(category)
                 .build();
 
-        if (imageFile != null && !imageFile.isEmpty()) {
+        if (thumbnailImageFile != null && !thumbnailImageFile.isEmpty()) {
             try {
-                String imageUrl = cloudinaryService.uploadImage(imageFile);
-                product.setThumbnailImage(imageUrl);
-
-
+                String thumbnailImageUrl = cloudinaryService.uploadImage(thumbnailImageFile);
+                product.setThumbnailImage(thumbnailImageUrl);
             } catch (IOException e) {
-                throw new RuntimeException("Error uploading image to Cloudinary");
+                throw new RuntimeException("Error uploading thumbnail image to Cloudinary", e);
             }
         }
 
-        // Save product to the database
+        List<ProductImage> productImages = new ArrayList<>();
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            try {
+                for (MultipartFile imageFile : imageFiles) {
+                    String imageUrl = cloudinaryService.uploadImage(imageFile);
+                    ProductImage productImage = ProductImage.builder()
+                            .image(imageUrl)
+                            .product(product)
+                            .build();
+                    productImages.add(productImage);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error uploading product images to Cloudinary", e);
+            }
+        }
+
+        product.setProductImages(productImages);
+
         productRepository.save(product);
 
         return toResponse(product);
     }
 
     @Transactional
-    public ProductResponse updateProduct(UUID id, CreateProductRequest request, MultipartFile imageFile) {
+    public ProductResponse updateProduct(UUID id,
+                                         CreateProductRequest request,
+                                         MultipartFile thumbnailImageFile,
+                                         List<MultipartFile> imageFiles) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found!"));
 
@@ -104,26 +120,70 @@ public class ProductService {
         existingProduct.setMinUnitToOrder(request.getMinUnitToOrder());
         existingProduct.setCategory(category);
 
-        String oldUrl = existingProduct.getThumbnailImage();
+        String oldThumbnailUrl = existingProduct.getThumbnailImage();
 
-        if (imageFile != null && !imageFile.isEmpty()) {
+        if (thumbnailImageFile != null && !thumbnailImageFile.isEmpty()) {
             try {
-                String imageUrl = cloudinaryService.uploadImage(imageFile);
-                existingProduct.setThumbnailImage(imageUrl);
+                // Upload the new thumbnail image
+                String newThumbnailImageUrl = cloudinaryService.uploadImage(thumbnailImageFile);
+                existingProduct.setThumbnailImage(newThumbnailImageUrl);
 
-                if (oldUrl != null && !oldUrl.isBlank()) {
-                    String publicId = cloudinaryService.getPublicIdFromUrl(oldUrl);
+                // Delete the old thumbnail image from Cloudinary
+                if (oldThumbnailUrl != null && !oldThumbnailUrl.isBlank()) {
+                    String publicId = cloudinaryService.getPublicIdFromUrl(oldThumbnailUrl);
                     cloudinaryService.deleteAsset(publicId);
                 }
             } catch (IOException e) {
-                throw new IllegalArgumentException("Error uploading image to Cloudinary");
+                throw new IllegalArgumentException("Error uploading new thumbnail image to Cloudinary", e);
             }
         }
 
-        return toResponse(existingProduct);
+        // Handle product images - first detach all existing images to avoid orphan deletion issues
+        List<ProductImage> existingImages = new ArrayList<>(existingProduct.getProductImages());
+
+        // Get the list of remaining image IDs from the request
+        List<String> removedImageUrls = request.getRemovedImageUrls();
+
+        // Remove images that are marked for deletion
+        if (removedImageUrls != null && !removedImageUrls.isEmpty()) {
+            for (ProductImage image : existingImages) {
+                if (removedImageUrls.contains(image.getImage())) {
+                    existingProduct.getProductImages().remove(image);
+
+                    // Delete images that are no longer needed
+                    try {
+                        String publicId = cloudinaryService.getPublicIdFromUrl(image.getImage());
+                        cloudinaryService.deleteAsset(publicId);
+                    }
+                    catch (Exception e) {
+                        log.error("Error deleting image from Cloudinary: {}", e.getMessage());
+                    }
+                }
+            }
+        }
+
+        // Add new images if any
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            try {
+                for (MultipartFile imageFile : imageFiles) {
+                    if (!imageFile.isEmpty()) {
+                        String imageUrl = cloudinaryService.uploadImage(imageFile);
+                        ProductImage productImage = ProductImage.builder()
+                                .image(imageUrl)
+                                .product(existingProduct)
+                                .build();
+                        existingProduct.getProductImages().add(productImage);
+                    }
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error uploading product images to Cloudinary", e);
+            }
+        }
+
+        Product savedProduct = productRepository.save(existingProduct);
+
+        return toResponse(savedProduct);
     }
-
-
 
     public ProductResponse getProductById(UUID id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
@@ -217,7 +277,7 @@ public class ProductService {
 
     private ProductResponse toResponse(Product product) {
         List<String> imageUrls = Optional.ofNullable(product.getProductImages())
-                .orElse(Collections.emptySet())
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(ProductImage::getImage)
                 .toList();

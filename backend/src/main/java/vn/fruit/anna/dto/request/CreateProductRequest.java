@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import vn.fruit.anna.enums.Unit;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class CreateProductRequest {
@@ -39,4 +41,6 @@ public class CreateProductRequest {
 
     @NotBlank(message = "Product's category cannot be blank!")
     private String categoryName;
+
+    private List<String> removedImageUrls;
 }
