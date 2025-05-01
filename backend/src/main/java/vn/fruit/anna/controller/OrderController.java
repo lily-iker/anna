@@ -1,5 +1,6 @@
 package vn.fruit.anna.controller;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import vn.fruit.anna.dto.response.ApiResponse;
 import vn.fruit.anna.enums.OrderStatus;
 import vn.fruit.anna.service.OrderService;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 @RestController
@@ -22,7 +24,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) throws MessagingException, UnsupportedEncodingException {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         201,

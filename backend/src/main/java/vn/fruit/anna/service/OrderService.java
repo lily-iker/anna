@@ -1,5 +1,6 @@
 package vn.fruit.anna.service;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import vn.fruit.anna.repository.OrderRepository;
 import vn.fruit.anna.repository.ProductRepository;
 import vn.fruit.anna.repository.specification.OrderSpecification;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,9 +39,10 @@ public class OrderService {
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
     private final ProductRepository productRepository;
+    private final MailService mailService;
 
     @Transactional
-    public OrderResponse createOrder(CreateOrderRequest request) {
+    public OrderResponse createOrder(CreateOrderRequest request) throws MessagingException, UnsupportedEncodingException {
         Customer customer = customerRepository.findOneByNameContainingIgnoreCase(request.getCustomerName())
                 .orElseGet(() -> customerService.createNewCustomer(request));
 
@@ -61,6 +64,8 @@ public class OrderService {
         orderRepository.flush();
 
         customerService.updateCustomerOrderStats(customer, order);
+
+        mailService.sendOrderConfirmMail(order);
 
         return toResponse(order);
     }
