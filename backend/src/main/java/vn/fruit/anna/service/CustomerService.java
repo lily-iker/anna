@@ -5,7 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.fruit.anna.dto.request.CreateOrderRequest;
 import vn.fruit.anna.dto.request.ListCustomersByIdsRequest;
+import vn.fruit.anna.model.Order;
 import vn.fruit.anna.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,6 +48,24 @@ public class CustomerService {
         if (!customers.isEmpty()) {
             customerRepository.deleteAll(customers);
         }
+    }
+
+    @Transactional
+    public Customer createNewCustomer(CreateOrderRequest request) {
+        Customer newCustomer = Customer.builder()
+                .name(request.getCustomerName())
+                .address(request.getCustomerAddress())
+                .phoneNumber(request.getCustomerPhone())
+                .email(request.getCustomerEmail())
+                .totalOrders(0)
+                .build();
+        return customerRepository.save(newCustomer);
+    }
+
+    public void updateCustomerOrderStats(Customer customer, Order order) {
+        customer.setLastOrderDate(order.getCreatedAt());
+        customer.setTotalOrders(customer.getTotalOrders() + 1);
+        customerRepository.save(customer);
     }
 
     private CustomerResponse toResponse(Customer customer) {

@@ -541,13 +541,20 @@ public class DataInitializer {
 
             for (int j = 0; j < numberOfItems; j++) {
                 Product product = products.get(random.nextInt(products.size()));
-                int quantity = 1 + random.nextInt(5);
+                Integer quantity = 1 + random.nextInt(5);
+                Double price = product.getSellingPrice()
+                        * quantity
+                        * (1 - (product.getDiscountPercentage() != null ? product.getDiscountPercentage() : 0) / 100);
 
                 OrderItem item = OrderItem.builder()
                         .order(order)
-                        .product(product)
+                        .productId(product.getId())
+                        .productName(product.getName())
+                        .productOrigin(product.getOrigin())
+                        .productSellingPrice(product.getSellingPrice())
+                        .productDiscountPercentage(product.getDiscountPercentage())
                         .quantity(quantity)
-                        .price(product.getSellingPrice())
+                        .price(price)
                         .build();
 
                 total += item.getPrice() * item.getQuantity();

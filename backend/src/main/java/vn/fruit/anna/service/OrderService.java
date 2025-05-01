@@ -4,17 +4,25 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.fruit.anna.dto.filter.OrderFilter;
+import vn.fruit.anna.dto.request.CreateOrderRequest;
 import vn.fruit.anna.dto.request.ListOrdersByIdsRequest;
+import vn.fruit.anna.dto.request.OrderItemRequest;
 import vn.fruit.anna.dto.response.OrderItemResponse;
 import vn.fruit.anna.dto.response.OrderResponse;
 import vn.fruit.anna.enums.OrderStatus;
+import vn.fruit.anna.exception.ResourceNotFoundException;
+import vn.fruit.anna.model.Customer;
 import vn.fruit.anna.model.Order;
 import vn.fruit.anna.model.OrderItem;
+import vn.fruit.anna.model.Product;
+import vn.fruit.anna.repository.CustomerRepository;
 import vn.fruit.anna.repository.OrderRepository;
+import vn.fruit.anna.repository.ProductRepository;
 import vn.fruit.anna.repository.specification.OrderSpecification;
 
 import java.util.List;
@@ -26,29 +34,36 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
+    private final CustomerService customerService;
+    private final ProductRepository productRepository;
 
-//    @Transactional
-//    public Order createOrder(CreateOrderRequest request) {
-//        Customer customer = customerRepository.findById(request.getCustomerId())
-//                .orElseThrow(() -> new NotFoundException("Customer not found"));
-//        // if not found create new customer
-//
-//        Order order = Order.builder()
-//                .customer(customer)
-//                .orderDate(new Date()) // Or use createdAt if in BaseEntity
-//                .status(OrderStatus.PENDING)
-//                // ... other fields
-//                .build();
-//
-//        orderRepository.save(order);
-//
-//        // 🔄 Update customer's lastOrderDate
-//        customer.setLastOrderDate(order.getOrderDate());
-//        customer.setTotalOrders(customer.getTotalOrders() + 1);
-//        customerRepository.save(customer);
-//
-//        return order;
-//    }
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        Customer customer = customerRepository.findOneByNameContainingIgnoreCase(request.getCustomerName())
+                .orElseGet(() -> customerService.createNewCustomer(request));
+
+        Order order = Order.builder()
+                .customer(customer)
+                .status(OrderStatus.NEW)
+                .estimatedDeliveryDate(request.getEstimatedDeliveryDate())
+                .build();
+
+        List<OrderItem> orderItems = processOrderItems(request.getOrderItemRequests(), order);
+        order.setOrderItems(orderItems);
+
+        Double total = orderItems.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+        order.setTotalPrice(total);
+
+        orderRepository.save(order);
+        orderRepository.flush();
+
+        customerService.updateCustomerOrderStats(customer, order);
+
+        return toResponse(order);
+    }
 
     public OrderResponse getOrderById(UUID orderId) {
         Order order = orderRepository.findById(orderId)
@@ -56,8 +71,17 @@ public class OrderService {
         return toResponse(order);
     }
 
-    public Page<OrderResponse> searchOrders(OrderFilter filter, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<OrderResponse> searchOrders(OrderFilter filter,
+                                            int page,
+                                            int size,
+                                            String sortBy,
+                                            String direction) {
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Sort sort = Sort.by(sortDirection, sortBy);
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         Specification<Order> spec = OrderSpecification.applyFilter(filter);
         return orderRepository.findAll(spec, pageable).map(this::toResponse);
     }
@@ -94,6 +118,9 @@ public class OrderService {
                 .totalPrice(order.getTotalPrice())
                 .status(order.getStatus())
                 .customerName(order.getCustomer() != null ? order.getCustomer().getName() : null)
+                .customerEmail(order.getCustomer() != null ? order.getCustomer().getEmail() : null)
+                .customerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null)
+                .customerPhoneNumber(order.getCustomer() != null ? order.getCustomer().getPhoneNumber() : null)
                 .createdAt(order.getCreatedAt())
                 .items(itemResponses)
                 .build();
@@ -102,11 +129,47 @@ public class OrderService {
     private OrderItemResponse toItemResponse(OrderItem item) {
         return OrderItemResponse.builder()
                 .id(item.getId())
-                .productId(item.getProduct().getId())
-                .productName(item.getProduct().getName())
-                .productThumbnailImage(item.getProduct().getThumbnailImage())
+                .productId(item.getProductId())
+                .productName(item.getProductName())
+                .productOrigin(item.getProductOrigin())
+                .productSellingPrice(item.getProductSellingPrice())
+                .productDiscountPercentage(item.getProductDiscountPercentage())
                 .quantity(item.getQuantity())
                 .price(item.getPrice())
                 .build();
+    }
+
+    private List<OrderItem> processOrderItems(List<OrderItemRequest> itemRequests, Order order) {
+        return itemRequests.stream()
+                .map(itemRequest -> {
+                    Product product = productRepository.findById(itemRequest.getProductId())
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Product not found with id: " + itemRequest.getProductId()));
+
+                    return OrderItem.builder()
+                            .order(order)
+                            .productId(product.getId())
+                            .productName(product.getName())
+                            .productOrigin(product.getOrigin())
+                            .productSellingPrice(product.getSellingPrice())
+                            .productDiscountPercentage(product.getDiscountPercentage())
+                            .quantity(itemRequest.getQuantity())
+                            .price(calculateItemPrice(product, itemRequest.getQuantity()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private Double calculateItemPrice(Product product, Integer quantity) {
+        double unitPrice = product.getSellingPrice() *
+                (1 - (product.getDiscountPercentage() != null ?
+                        product.getDiscountPercentage() : 0) / 100);
+        return unitPrice * quantity;
+    }
+
+    private void updateCustomerOrderStats(Customer customer, Order order) {
+        customer.setLastOrderDate(order.getCreatedAt());
+        customer.setTotalOrders(customer.getTotalOrders() + 1);
+        customerRepository.save(customer);
     }
 }

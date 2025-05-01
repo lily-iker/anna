@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.fruit.anna.dto.filter.OrderFilter;
+import vn.fruit.anna.dto.request.CreateOrderRequest;
 import vn.fruit.anna.dto.request.ListOrdersByIdsRequest;
 import vn.fruit.anna.dto.request.UpdateOrderStatusRequest;
 import vn.fruit.anna.dto.response.ApiResponse;
@@ -20,6 +21,17 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @PostMapping
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        201,
+                        "Order created successfully",
+                        orderService.createOrder(request)
+                )
+        );
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderById(@PathVariable UUID orderId) {
         return ResponseEntity.ok(
@@ -34,7 +46,9 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String customerName,
-            @RequestParam(required = false) OrderStatus status
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(defaultValue = "createdAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "desc", required = false) String direction
     ) {
         OrderFilter filter = OrderFilter.builder()
                 .customerName(customerName)
@@ -44,7 +58,7 @@ public class OrderController {
         return ResponseEntity.ok(
                 new ApiResponse<>(200,
                         "Orders searched successfully",
-                        orderService.searchOrders(filter, page, size))
+                        orderService.searchOrders(filter, page, size, sortBy, direction))
         );
     }
 

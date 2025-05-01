@@ -113,14 +113,19 @@ public class BlogService {
     }
 
     private BlogResponse toResponse(Blog blog) {
+        Long nextBlogId = blogRepository.findNextBlogId(blog.getCreatedAt()).orElse(null);
+        Long previousBlogId = blogRepository.findPreviousBlogId(blog.getCreatedAt()).orElse(null);
+
         return BlogResponse.builder()
                 .id(blog.getId())
                 .title(blog.getTitle())
-                .thumbnailImage(blog.getThumbnailImage())
                 .sapo(blog.getSapo())
+                .thumbnailImage(blog.getThumbnailImage())
                 .content(blog.getContent())
                 .author(blog.getAuthor())
                 .createdAt(blog.getCreatedAt())
+                .nextBlogId(nextBlogId)
+                .previousBlogId(previousBlogId)
                 .build();
     }
 }
