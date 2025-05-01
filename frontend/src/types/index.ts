@@ -49,6 +49,8 @@ export interface Blog {
   content: string
   author: string
   createdAt: string
+  nextBlogId: string | null
+  previousBlogId: string | null
 }
 
 export type Customer = {
@@ -77,6 +79,9 @@ export interface Order {
   totalPrice: number
   status: OrderStatus
   customerName: string
+  customerEmail: string
+  customerAddress: string
+  customerPhoneNumber: string
   createdAt: string
   items: OrderItem[]
 }

@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Minus, Plus, ChevronDown, Loader2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Minus, Plus, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatCurrency } from '@/lib/format'
 import useCartStore from '@/stores/useCartStore'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import toast from 'react-hot-toast'
 
 export default function CartPage() {
+  const navigate = useNavigate()
   const {
     items,
     cartItems,
@@ -21,6 +23,7 @@ export default function CartPage() {
     fetchCartItems,
     isLoading,
     error,
+    setSelectedItems: storeSetSelectedItems,
   } = useCartStore()
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [isAllSelected, setIsAllSelected] = useState(false)
@@ -78,6 +81,29 @@ export default function CartPage() {
       .reduce((total, item) => total + item.price * item.quantity, 0)
   }
 
+  // Handle checkout button click
+  const handleCheckout = () => {
+    // Check if any items are selected
+    if (selectedItems.length === 0) {
+      // Show an alert or toast message
+      toast.error('Vui lòng chọn ít nhất một sản phẩm để thanh toán')
+      return
+    }
+
+    // Save selected items to store
+    storeSetSelectedItems(selectedItems)
+
+    // Log selected items for debugging
+    console.log('Selected items for checkout:', selectedItems)
+
+    // Save delivery date and time to localStorage
+    localStorage.setItem('deliveryDate', deliveryDate)
+    localStorage.setItem('deliveryTime', deliveryTime)
+
+    // Navigate to checkout page
+    navigate('/checkout')
+  }
+
   // Generate delivery dates dynamically (today + 5 days)
   const deliveryDates = Array.from({ length: 6 }, (_, i) => {
     const date = new Date()
@@ -110,19 +136,6 @@ export default function CartPage() {
       </div>
     )
   }
-
-  // Loading state
-  //   if (isLoading) {
-  //     return (
-  //       <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 py-8">
-  //         <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
-  //         <div className="bg-white rounded-lg shadow p-24 text-center">
-  //           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-green-600" />
-  //           <p className="text-gray-600">Đang tải thông tin giỏ hàng...</p>
-  //         </div>
-  //       </div>
-  //     )
-  //   }
 
   // Error state
   if (error) {
@@ -334,7 +347,11 @@ export default function CartPage() {
               </div>
             </div>
 
-            <Button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white">
+            <Button
+              className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={handleCheckout}
+              disabled={selectedItems.length === 0}
+            >
               THANH TOÁN
             </Button>
 

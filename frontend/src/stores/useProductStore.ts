@@ -51,7 +51,7 @@ const useProductStore = create<ProductStoreState>((set, get) => ({
   totalProducts: 0,
   totalPages: 0,
   currentPage: 1,
-  pageSize: 10,
+  pageSize: 12,
   searchName: '',
   minPrice: 0,
   maxPrice: 1000000,

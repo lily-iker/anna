@@ -30,13 +30,13 @@ const useBlogStore = create<BlogStoreState>((set, get) => ({
   totalBlogs: 0,
   totalPages: 0,
   currentPage: 1,
-  pageSize: 10,
+  pageSize: 5,
   currentBlog: null,
   searchTitle: '',
 
   setSearchTitle: (title) => set({ searchTitle: title }),
 
-  fetchBlogs: async (page = 1, size = 5, title?: string) => {
+  fetchBlogs: async (page = get().currentPage, size = get().pageSize, title?: string) => {
     set({ isLoading: true, error: null })
     try {
       const state = get()

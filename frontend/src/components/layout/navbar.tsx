@@ -63,7 +63,7 @@ export default function MainNavbar() {
             </div>
 
             {/* Search bar */}
-            <div className="flex-1 max-w-md mx-4 bg-white rounded-lg shadow-md">
+            <div className="flex-1 max-w-sm ml-24 bg-white rounded-lg shadow-md">
               <form onSubmit={handleSearch} className="relative flex items-center">
                 <Input
                   placeholder="Tìm kiếm sản phẩm..."
@@ -112,7 +112,7 @@ export default function MainNavbar() {
               </div>
 
               {/* Desktop Nav */}
-              <nav className="hidden md:flex items-center space-x-12">
+              <nav className="hidden md:flex items-center space-x-12 lg:mr-32">
                 <Link to="/" className="text-gray-700 hover:text-green-600 font-medium">
                   Trang chủ
                 </Link>
@@ -122,7 +122,7 @@ export default function MainNavbar() {
                 >
                   Danh mục
                 </Link>
-                <Link to="/blog" className="text-gray-700 hover:text-green-600 font-medium">
+                <Link to="/blogs" className="text-gray-700 hover:text-green-600 font-medium">
                   Blog
                 </Link>
                 <Link to="/contact" className="text-gray-700 hover:text-green-600 font-medium">
@@ -205,7 +205,7 @@ export default function MainNavbar() {
               <LayoutGrid className="h-5 w-5" /> Danh mục
             </Link>
             <Link
-              to="/blog"
+              to="/blogs"
               className="flex items-center gap-3 text-gray-700 hover:text-green-600 font-medium"
               onClick={() => setSidebarOpen(false)}
             >

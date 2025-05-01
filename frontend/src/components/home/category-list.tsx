@@ -43,7 +43,7 @@ const CategoryList = ({ items }: CategoryListProps) => {
     <>
       <div className="relative w-fit mb-6">
         <h2 className="text-2xl font-bold">DANH MỤC</h2>
-        <div className="absolute left-0 -bottom-1 h-[1.5px] w-full bg-gradient-to-r from-gray-500 via-gray-300 to-transparent" />
+        <div className="absolute left-0 -bottom-1 h-[1.5px] w-full bg-gradient-to-r from-gray-300 via-gray-300 to-transparent"></div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">

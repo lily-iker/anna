@@ -1,38 +1,15 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 
-interface MapProps {
-  address: string
-  height?: string
-}
-
-export default function Map({ address, height = '400px' }: MapProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  useEffect(() => {
-    // This would be where you'd initialize a map library like Google Maps or Leaflet
-    // For now, we'll just simulate loading
-    const timer = setTimeout(() => {
-      setIsLoaded(true)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
+export default function Map() {
   return (
     <Card className="overflow-hidden">
-      {!isLoaded ? (
-        <div className="w-full bg-gray-200 flex items-center justify-center" style={{ height }}>
-          <div className="animate-pulse">Đang tải bản đồ...</div>
-        </div>
-      ) : (
-        <div className="w-full bg-gray-200 flex items-center justify-center" style={{ height }}>
-          <p className="text-xl font-bold text-gray-800">Bản đồ: {address}</p>
-          {/* In a real implementation, you would render your map here */}
-        </div>
-      )}
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d658.5996173314793!2d105.76384514122294!3d20.968490707163156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x313452df4fb09f93%3A0xea846dbc0b93df61!2zMTIxIFAuIFBoYW4gxJDDrG5oIEdpw7N0LCBMYSBLaMOqLCBIw6AgxJDDtG5nLCBIw6AgTuG7mWkgMTAwMDAwLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1746008187949!5m2!1svi!2s"
+        className="w-full h-[450px] border-0"
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      ></iframe>
     </Card>
   )
 }

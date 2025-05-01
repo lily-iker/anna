@@ -12,6 +12,10 @@ import CategoryImagePage from './pages/admin/CategoryImagePage'
 import EditBannerPage from './pages/admin/EditBannerPage'
 import ViewFeedbackPage from './pages/admin/ViewFeedbackPage'
 import ProductDetailPage from './pages/ProductDetailPage'
+import { BlogDetailPage } from './pages/BlogDetailPage'
+import SearchBlogPage from './pages/SearchBlogPage'
+import CheckoutPage from './pages/checkout/CheckoutPage'
+import CheckoutSuccessPage from './pages/checkout/CheckoutSuccessPage'
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -58,7 +62,12 @@ function App() {
         <Route path="/search" element={<SearchProductPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/blogs" element={<SearchBlogPage />} />
+        <Route path="/blog/:id" element={<BlogDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/checkout-success" element={<CheckoutSuccessPage />} />
+
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 

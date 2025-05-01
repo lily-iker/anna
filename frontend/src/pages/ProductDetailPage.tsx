@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/format'
 import useProductStore from '@/stores/useProductStore'
@@ -20,10 +20,11 @@ import useBlogStore from '@/stores/useBlogStore'
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { fetchProductById, isLoading, currentProduct } = useProductStore()
-  const { addItem } = useCartStore()
+  const { addItem, getExistingQuantity } = useCartStore()
+  const navigate = useNavigate()
 
   const [quantity, setQuantity] = useState(1)
-
+  const [existingCartQuantity, setExistingCartQuantity] = useState(0)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
 
   const { blogs, fetchBlogs } = useBlogStore()
@@ -38,6 +39,19 @@ export default function ProductDetailPage() {
   useEffect(() => {
     fetchBlogs()
   }, [fetchBlogs])
+
+  // Check existing quantity in cart when product loads
+  useEffect(() => {
+    if (currentProduct) {
+      const existingQty = getExistingQuantity(currentProduct.id)
+      setExistingCartQuantity(existingQty)
+
+      // If this is a new product and has a minimum order quantity, set the initial quantity to that
+      if (existingQty === 0 && currentProduct.minUnitToOrder > 1) {
+        setQuantity(currentProduct.minUnitToOrder)
+      }
+    }
+  }, [currentProduct, getExistingQuantity])
 
   useEffect(() => {
     const fetchRelatedProducts = async () => {
@@ -108,16 +122,56 @@ export default function ProductDetailPage() {
   }
 
   const decreaseQuantity = () => {
-    if (currentProduct && quantity > currentProduct.minUnitToOrder) {
-      setQuantity(quantity - 1)
+    if (existingCartQuantity === 0 && currentProduct) {
+      // If this is a new product, don't go below minimum order quantity
+      if (quantity > currentProduct.minUnitToOrder) {
+        setQuantity(quantity - 1)
+      } else {
+        toast.error(
+          `Sản phẩm này yêu cầu đặt tối thiểu ${currentProduct.minUnitToOrder} ${currentProduct.unit}.`
+        )
+      }
     } else if (quantity > 1) {
+      // If already in cart, can go down to 1
       setQuantity(quantity - 1)
     }
   }
 
   const addToCart = (product: Product) => {
+    // Add the product to the cart
     addItem(product, quantity)
-    toast.success(`Đã thêm ${quantity} ${product.unit} ${product.name} vào giỏ hàng`)
+
+    // Immediately update UI to reflect new cart quantity
+    const newQuantity = getExistingQuantity(product.id)
+    setExistingCartQuantity(newQuantity)
+  }
+
+  const handleBuyNow = () => {
+    if (!currentProduct) return
+
+    // Calculate the actual price (considering discount)
+    const actualPrice =
+      currentProduct.discountPercentage > 0
+        ? Math.round(currentProduct.sellingPrice * (1 - currentProduct.discountPercentage / 100))
+        : currentProduct.sellingPrice
+
+    // Determine the final quantity to use (respect minimum order rule)
+    const finalQuantity =
+      quantity < currentProduct.minUnitToOrder ? currentProduct.minUnitToOrder : quantity
+
+    // Prepare checkout product object
+    const directCheckoutProduct = {
+      productId: currentProduct.id,
+      quantity: finalQuantity,
+      name: currentProduct.name,
+      price: actualPrice,
+      image: currentProduct.thumbnailImage,
+      unit: currentProduct.unit,
+    }
+
+    // Store in session and navigate
+    sessionStorage.setItem('directCheckout', JSON.stringify(directCheckoutProduct))
+    navigate('/checkout')
   }
 
   if (isLoading || !currentProduct) {
@@ -251,6 +305,18 @@ export default function ProductDetailPage() {
                   <Plus size={16} />
                 </Button>
               </div>
+
+              {currentProduct.minUnitToOrder > 1 && existingCartQuantity === 0 && (
+                <span className="ml-2 text-xs text-orange-500">
+                  Tối thiểu: {currentProduct.minUnitToOrder} {currentProduct.unit}
+                </span>
+              )}
+
+              {existingCartQuantity > 0 && (
+                <span className="ml-2 text-xs text-blue-500">
+                  Đã có {existingCartQuantity} {currentProduct.unit} trong giỏ hàng
+                </span>
+              )}
             </div>
 
             {/* Stock Status */}
@@ -284,6 +350,7 @@ export default function ProductDetailPage() {
             <Button
               className="flex-1 bg-orange-500 hover:bg-orange-600"
               disabled={currentProduct.stock === 0}
+              onClick={handleBuyNow}
             >
               MUA NGAY
             </Button>

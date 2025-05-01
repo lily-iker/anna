@@ -85,7 +85,7 @@ export default function ProductList({ title, products }: ProductListProps) {
       <div className="flex relative justify-between items-center">
         <div className="relative w-fit">
           <h2 className="text-2xl font-bold">{title}</h2>
-          <div className="absolute left-0 -bottom-1 h-[1.5px] w-full bg-gradient-to-r from-gray-500 via-gray-300 to-transparent"></div>
+          <div className="absolute left-0 -bottom-1 h-[1.5px] w-full bg-gradient-to-r from-gray-300 via-gray-300 to-transparent"></div>
         </div>
         <Link
           to="/search"

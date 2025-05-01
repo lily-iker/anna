@@ -104,7 +104,7 @@ export default function EditOrderPage() {
                   </Label>
                   <Input
                     id="email"
-                    value="customer@example.com"
+                    value={currentOrder.customerEmail}
                     className="mt-1 bg-gray-50"
                     disabled
                   />
@@ -117,7 +117,7 @@ export default function EditOrderPage() {
                 </Label>
                 <Input
                   id="address"
-                  value={currentOrder.note || ''}
+                  value={currentOrder.customerAddress || ''}
                   className="mt-1 bg-gray-50"
                   disabled
                 />
@@ -258,8 +258,15 @@ export default function EditOrderPage() {
                   </Label>
                   <Input
                     id="deliveryTime"
-                    type="time"
-                    defaultValue="12:00"
+                    value={
+                      currentOrder.estimatedDeliveryDate
+                        ? currentOrder.estimatedDeliveryDate
+                            .split('T')[1]
+                            .split(':')
+                            .slice(0, 2)
+                            .join(':')
+                        : ''
+                    }
                     className="mt-1 bg-gray-50"
                     disabled
                   />
