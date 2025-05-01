@@ -17,6 +17,7 @@ import useProductStore from '@/stores/useProductStore'
 import useCategoryStore from '@/stores/useCategoryStore'
 import toast from 'react-hot-toast'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { X } from 'lucide-react'
 
 export default function AddProductPage() {
   const navigate = useNavigate()
@@ -36,10 +37,17 @@ export default function AddProductPage() {
   })
   const [discountPrice, setDiscountPrice] = useState<number>(0)
 
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dropAreaRef = useRef<HTMLDivElement>(null)
-  const [previewImage, setPreviewImage] = useState<string>('')
+  // Thumbnail image state
+  const [thumbnailImageFile, setThumbnailImageFile] = useState<File | null>(null)
+  const thumbnailFileInputRef = useRef<HTMLInputElement>(null)
+  const thumbnailDropAreaRef = useRef<HTMLDivElement>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('')
+
+  // Multiple images state
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const imagesFileInputRef = useRef<HTMLInputElement>(null)
+  const imagesDropAreaRef = useRef<HTMLDivElement>(null)
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
 
   useEffect(() => {
     fetchCategories()
@@ -180,8 +188,8 @@ export default function AddProductPage() {
       return
     }
 
-    if (!imageFile) {
-      toast.error('Vui lòng tải lên hình ảnh sản phẩm')
+    if (!thumbnailImageFile) {
+      toast.error('Vui lòng tải lên hình ảnh đại diện sản phẩm')
       return
     }
 
@@ -192,8 +200,18 @@ export default function AddProductPage() {
     const productRequest = JSON.stringify(formData)
     productFormData.append('product', new Blob([productRequest], { type: 'application/json' }))
 
-    // Add image file
-    productFormData.append('imageFile', imageFile)
+    // Add thumbnail image file
+    productFormData.append('thumbnailImageFile', thumbnailImageFile)
+
+    // Add multiple image files
+    if (imageFiles.length > 0) {
+      imageFiles.forEach((file) => {
+        productFormData.append('imageFiles', file)
+      })
+    } else {
+      // If no additional images, add the thumbnail as the only image
+      productFormData.append('imageFiles', thumbnailImageFile)
+    }
 
     const result = await addProduct(productFormData)
     if (result) {
@@ -201,22 +219,47 @@ export default function AddProductPage() {
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Thumbnail image handling
+  const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setImageFile(file)
+      setThumbnailImageFile(file)
 
       // Create preview
       const reader = new FileReader()
       reader.onloadend = () => {
-        setPreviewImage(reader.result as string)
+        setThumbnailPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
     }
   }
 
+  // Multiple images handling
+  const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files)
+      setImageFiles((prev) => [...prev, ...newFiles])
+
+      // Create previews for new files
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setImagePreviews((prev) => [...prev, reader.result as string])
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index))
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // Thumbnail drop area setup
   useEffect(() => {
-    const dropArea = dropAreaRef.current
+    const dropArea = thumbnailDropAreaRef.current
     if (!dropArea) return
 
     const preventDefaults = (e: Event) => {
@@ -242,14 +285,84 @@ export default function AddProductPage() {
       const files = dt.files
       if (files.length) {
         const file = files[0]
-        setImageFile(file)
+        setThumbnailImageFile(file)
 
         // Create preview
         const reader = new FileReader()
         reader.onloadend = () => {
-          setPreviewImage(reader.result as string)
+          setThumbnailPreview(reader.result as string)
         }
         reader.readAsDataURL(file)
+      }
+    }
+
+    // Event listeners
+    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+      dropArea.addEventListener(eventName, preventDefaults, false)
+    })
+    ;['dragenter', 'dragover'].forEach((eventName) => {
+      dropArea.addEventListener(eventName, highlight, false)
+    })
+    ;['dragleave', 'drop'].forEach((eventName) => {
+      dropArea.addEventListener(eventName, unhighlight, false)
+    })
+
+    dropArea.addEventListener('drop', handleDrop as EventListener, false)
+
+    // Cleanup function
+    return () => {
+      ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+        dropArea.removeEventListener(eventName, preventDefaults, false)
+      })
+      ;['dragenter', 'dragover'].forEach((eventName) => {
+        dropArea.removeEventListener(eventName, highlight, false)
+      })
+      ;['dragleave', 'drop'].forEach((eventName) => {
+        dropArea.removeEventListener(eventName, unhighlight, false)
+      })
+
+      dropArea.removeEventListener('drop', handleDrop as EventListener, false)
+    }
+  }, [])
+
+  // Images drop area setup
+  useEffect(() => {
+    const dropArea = imagesDropAreaRef.current
+    if (!dropArea) return
+
+    const preventDefaults = (e: Event) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    const highlight = () => {
+      dropArea.classList.add('border-orange-500')
+    }
+
+    const unhighlight = () => {
+      dropArea.classList.remove('border-orange-500')
+    }
+
+    const handleDrop = (e: DragEvent) => {
+      preventDefaults(e)
+      unhighlight()
+
+      const dt = e.dataTransfer
+      if (!dt) return
+
+      const files = dt.files
+      if (files.length) {
+        const newFiles = Array.from(files)
+        setImageFiles((prev) => [...prev, ...newFiles])
+
+        // Create previews for new files
+        Array.from(files).forEach((file) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setImagePreviews((prev) => [...prev, reader.result as string])
+          }
+          reader.readAsDataURL(file)
+        })
       }
     }
 
@@ -337,23 +450,24 @@ export default function AddProductPage() {
               />
             </div>
 
+            {/* Thumbnail Image Upload */}
             <div className="md:col-span-2">
               <Label htmlFor="thumbnailImage" className="text-sm font-medium">
-                Hình ảnh <span className="text-red-500">*</span>
+                Hình ảnh đại diện <span className="text-red-500">*</span>
               </Label>
               <div
-                ref={dropAreaRef}
+                ref={thumbnailDropAreaRef}
                 className="mt-1 border-2 border-dashed border-gray-300 rounded-md p-8 text-center transition-colors duration-200 cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => thumbnailFileInputRef.current?.click()}
               >
-                {previewImage ? (
+                {thumbnailPreview ? (
                   <div className="flex flex-col items-center">
                     <img
-                      src={previewImage || '/placeholder.svg'}
-                      alt={formData.name}
-                      className="h-32 object-contain mb-2"
+                      src={thumbnailPreview || '/placeholder.svg'}
+                      alt="Thumbnail preview"
+                      className="h-32 object-contain mb-2 rounded-md"
                     />
-                    <p className="text-sm text-gray-500">{imageFile?.name}</p>
+                    <p className="text-sm text-gray-500">{thumbnailImageFile?.name}</p>
                     <p className="text-sm text-gray-500 mt-2">
                       Kéo & Thả các tệp tin của bạn hoặc{' '}
                       <span className="text-orange-500 underline cursor-pointer">Tải lên</span>
@@ -368,13 +482,64 @@ export default function AddProductPage() {
                   </div>
                 )}
                 <input
-                  ref={fileInputRef}
-                  id="image-upload"
+                  ref={thumbnailFileInputRef}
+                  id="thumbnail-upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleImageUpload}
+                  onChange={handleThumbnailUpload}
                   className="hidden"
                 />
+              </div>
+            </div>
+
+            {/* Multiple Images Upload */}
+            <div className="md:col-span-2">
+              <Label htmlFor="images" className="text-sm font-medium">
+                Hình ảnh
+              </Label>
+              <div className="mt-1">
+                {/* Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-5 gap-4 mb-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={preview || '/placeholder.svg'}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover border rounded-md"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 hover:cursor-pointer"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Drop Area */}
+                <div
+                  ref={imagesDropAreaRef}
+                  className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center transition-colors duration-200 cursor-pointer"
+                  onClick={() => imagesFileInputRef.current?.click()}
+                >
+                  <p className="text-sm text-gray-500 mb-2">
+                    Kéo & Thả các tệp tin của bạn hoặc{' '}
+                    <span className="text-orange-500 underline cursor-pointer">Tải lên</span>
+                  </p>
+                  <input
+                    ref={imagesFileInputRef}
+                    id="images-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImagesUpload}
+                    className="hidden"
+                  />
+                </div>
               </div>
             </div>
           </div>

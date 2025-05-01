@@ -247,7 +247,7 @@ export default function AddBlogPage() {
                     <img
                       src={previewImage}
                       alt="Blog preview"
-                      className="h-32 object-contain mb-2"
+                      className="h-32 object-contain mb-2 rounded-md"
                     />
                     <p className="text-sm text-gray-500">{imageFile?.name}</p>
                     <p className="text-sm text-gray-500 mt-2">
