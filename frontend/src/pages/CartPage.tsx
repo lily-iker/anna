@@ -291,7 +291,8 @@ export default function CartPage() {
                               <img
                                 src={item.image || '/placeholder.svg?height=60&width=60'}
                                 alt={item.name}
-                                className="w-12 h-12 sm:w-16 sm:h-16 object-cover mr-2 sm:mr-3"
+                                className="w-12 h-12 sm:w-16 sm:h-16 object-cover mr-2 sm:mr-3 rounded-md hover:cursor-pointer"
+                                onClick={() => navigate(`/product/${item.productId}`)}
                               />
                               <div>
                                 <span className="font-medium text-sm sm:text-base line-clamp-2">
