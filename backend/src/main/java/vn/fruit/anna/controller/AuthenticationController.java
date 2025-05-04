@@ -39,4 +39,14 @@ public class AuthenticationController {
                         authenticationService.refresh(request, response))
         );
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@NonNull HttpServletRequest request,
+                                     @NonNull HttpServletResponse response) {
+        authenticationService.logout(request, response);
+        return ResponseEntity.ok(
+                new ApiResponse<>(200,
+                        "Logout success")
+        );
+    }
 }

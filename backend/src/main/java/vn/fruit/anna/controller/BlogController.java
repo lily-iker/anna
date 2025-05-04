@@ -63,12 +63,14 @@ public class BlogController {
     public ResponseEntity<?> searchBlogs(
             @RequestParam(required = false, defaultValue = "") String title,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "desc", required = false) String direction
     ) {
         return ResponseEntity.ok(
                 new ApiResponse<>(200,
                         "Blogs searched successfully",
-                        blogService.searchBlogs(title, page, size))
+                        blogService.searchBlogs(title, page, size, sortBy, direction))
         );
     }
 }

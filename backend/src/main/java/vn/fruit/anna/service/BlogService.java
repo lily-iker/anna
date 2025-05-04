@@ -3,6 +3,7 @@ package vn.fruit.anna.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,19 +104,33 @@ public class BlogService {
     public BlogResponse getBlogById(Long id) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found!"));
-        return toResponse(blog);
+
+//        Long previousBlogId = blogRepository.findPreviousBlogId(blog.getCreatedAt()).orElse(null);
+        Long nextBlogId = blogRepository.findNextBlogId(blog.getCreatedAt()).orElse(null);
+
+        BlogResponse response = toResponse(blog);
+//        response.setPreviousBlogId(previousBlogId);
+        response.setNextBlogId(nextBlogId);
+
+        return response;
     }
 
-    public Page<BlogResponse> searchBlogs(String title, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
+    public Page<BlogResponse> searchBlogs(String title,
+                                          int page,
+                                          int size,
+                                          String sortBy,
+                                          String direction) {
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Sort sort = Sort.by(sortDirection, sortBy);
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+
         return blogRepository.findByTitleContainingIgnoreCase(title, pageRequest)
                 .map(this::toResponse);
     }
 
     private BlogResponse toResponse(Blog blog) {
-        Long nextBlogId = blogRepository.findNextBlogId(blog.getCreatedAt()).orElse(null);
-        Long previousBlogId = blogRepository.findPreviousBlogId(blog.getCreatedAt()).orElse(null);
-
         return BlogResponse.builder()
                 .id(blog.getId())
                 .title(blog.getTitle())
@@ -124,8 +139,6 @@ public class BlogService {
                 .content(blog.getContent())
                 .author(blog.getAuthor())
                 .createdAt(blog.getCreatedAt())
-                .nextBlogId(nextBlogId)
-                .previousBlogId(previousBlogId)
                 .build();
     }
 }

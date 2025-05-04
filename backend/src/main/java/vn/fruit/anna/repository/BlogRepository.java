@@ -17,16 +17,16 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     @Query(value = """
         SELECT b.id FROM blog b 
-        WHERE b.created_at > :createdAt 
-        ORDER BY b.created_at ASC 
+        WHERE b.created_at < :createdAt 
+        ORDER BY b.created_at DESC 
         LIMIT 1
         """, nativeQuery = true)
     Optional<Long> findNextBlogId(@Param("createdAt") Date createdAt);
 
     @Query(value = """
         SELECT b.id FROM blog b 
-        WHERE b.created_at < :createdAt 
-        ORDER BY b.created_at DESC 
+        WHERE b.created_at > :createdAt 
+        ORDER BY b.created_at ASC 
         LIMIT 1
         """, nativeQuery = true)
     Optional<Long> findPreviousBlogId(@Param("createdAt") Date createdAt);
