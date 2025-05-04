@@ -245,11 +245,14 @@ const useCartStore = create<CartState>()(
             const cartItem = cartItems.find((item) => item.productId === product.id)
             const quantity = cartItem ? cartItem.quantity : 0
 
+            const discount = product.discountPercentage ?? 0
+            const finalPrice = product.sellingPrice * (1 - discount / 100)
+
             return {
               productId: product.id,
               quantity,
               name: product.name,
-              price: product.sellingPrice || product.originalPrice,
+              price: finalPrice,
               image: product.thumbnailImage,
               unit: product.unit,
               stock: product.stock,
@@ -271,7 +274,7 @@ const useCartStore = create<CartState>()(
           })
         } catch (error) {
           console.error('Failed to fetch cart items:', error)
-          set({ error: 'Failed to load cart items. Please try again.', isLoading: false })
+          set({ error: 'Lỗi giỏ hàng. Vui lòng thử lại', isLoading: false })
         }
       },
 

@@ -212,7 +212,7 @@ export default function EditOrderPage() {
                         </Label>
                         <Input
                           id={`price-${index}`}
-                          value={formatCurrency(item.price)}
+                          value={formatCurrency(item.price / item.quantity)}
                           className="mt-1 bg-gray-50"
                           disabled
                         />

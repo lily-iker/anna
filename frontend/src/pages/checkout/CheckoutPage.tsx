@@ -314,7 +314,7 @@ export default function CheckoutPage() {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Customer Information */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-12">
           <div>
             <label htmlFor="customerName" className="block mb-2 font-medium">
               Họ và Tên <span className="text-red-500">*</span>
@@ -380,7 +380,7 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          <div>
+          {/* <div>
             <label htmlFor="note" className="block mb-2 font-medium">
               Ghi chú
             </label>
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
               placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn."
               className="min-h-[100px]"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Order Summary */}
