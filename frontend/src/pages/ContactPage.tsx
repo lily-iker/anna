@@ -1,7 +1,6 @@
 'use client'
 
 import { MapPin, Phone, Clock, Facebook, MessageCircle } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Map from '@/components/contact/map'
 
 export default function ContactPage() {
@@ -13,7 +12,7 @@ export default function ContactPage() {
 
       {/* Map component */}
       <div className="mb-8">
-        <Map address={storeAddress} />
+        <Map />
       </div>
 
       <h2 className="text-center text-xl font-semibold text-green-500 mb-6">THÔNG TIN LIÊN HỆ</h2>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Minus, Plus, ChevronDown } from 'lucide-react'
+import { Minus, Plus, ChevronDown, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatCurrency } from '@/lib/format'
@@ -10,6 +10,7 @@ import useCartStore from '@/stores/useCartStore'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import toast from 'react-hot-toast'
+import { Badge } from '@/components/ui/badge'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -39,11 +40,13 @@ export default function CartPage() {
     fetchCartItems()
   }, [fetchCartItems])
 
-  // Initialize selected items with all items
+  // Initialize selected items with all in-stock items
   useEffect(() => {
     if (items.length > 0) {
-      setSelectedItems(items.map((item) => item.productId))
-      setIsAllSelected(true)
+      // Only select items that are in stock
+      const inStockItemIds = items.filter((item) => item.stock > 0).map((item) => item.productId)
+      setSelectedItems(inStockItemIds)
+      setIsAllSelected(inStockItemIds.length === items.length)
     } else {
       setSelectedItems([])
       setIsAllSelected(false)
@@ -55,13 +58,21 @@ export default function CartPage() {
     if (isAllSelected) {
       setSelectedItems([])
     } else {
-      setSelectedItems(items.map((item) => item.productId))
+      // Only select items that are in stock
+      const inStockItemIds = items.filter((item) => item.stock > 0).map((item) => item.productId)
+      setSelectedItems(inStockItemIds)
     }
     setIsAllSelected(!isAllSelected)
   }
 
   // Handle individual item selection
-  const handleSelectItem = (productId: string) => {
+  const handleSelectItem = (productId: string, isInStock: boolean) => {
+    // Prevent selecting out-of-stock items
+    if (!isInStock) {
+      toast.error('Không thể chọn sản phẩm hết hàng')
+      return
+    }
+
     if (selectedItems.includes(productId)) {
       setSelectedItems(selectedItems.filter((id) => id !== productId))
     } else {
@@ -71,7 +82,11 @@ export default function CartPage() {
 
   // Update isAllSelected when selectedItems changes
   useEffect(() => {
-    setIsAllSelected(selectedItems.length === items.length && items.length > 0)
+    // Count in-stock items
+    const inStockItemCount = items.filter((item) => item.stock > 0).length
+
+    // Check if all in-stock items are selected
+    setIsAllSelected(selectedItems.length === inStockItemCount && inStockItemCount > 0)
   }, [selectedItems, items])
 
   // Calculate total for selected items
@@ -157,9 +172,22 @@ export default function CartPage() {
     )
   }
 
+  // Check if there are any out-of-stock items
+  const hasOutOfStockItems = items.some((item) => item.stock < item.quantity)
+
   return (
     <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 pb-8 pt-24">
       <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
+
+      {hasOutOfStockItems && (
+        <Alert className="mb-4 bg-amber-50 border-amber-200">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800">
+            Một số sản phẩm trong giỏ hàng đã hết hàng hoặc không đủ số lượng. Vui lòng cập nhật số
+            lượng hoặc xóa sản phẩm.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* Cart Items Table */}
@@ -180,61 +208,82 @@ export default function CartPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item) => (
-                    <tr key={item.productId} className="border-b">
-                      <td className="py-4 px-4">
-                        <Checkbox
-                          checked={selectedItems.includes(item.productId)}
-                          onCheckedChange={() => handleSelectItem(item.productId)}
-                        />
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center">
-                          <img
-                            src={item.image || '/placeholder.svg?height=60&width=60'}
-                            alt={item.name}
-                            className="w-12 h-12 sm:w-16 sm:h-16 object-cover mr-2 sm:mr-3"
+                  {items.map((item) => {
+                    const isInStock = item.stock >= item.quantity
+                    return (
+                      <tr
+                        key={item.productId}
+                        className={`border-b ${!isInStock ? 'bg-red-50' : ''}`}
+                      >
+                        <td className="py-4 px-4">
+                          <Checkbox
+                            checked={selectedItems.includes(item.productId)}
+                            onCheckedChange={() => handleSelectItem(item.productId, isInStock)}
+                            disabled={!isInStock}
                           />
-                          <span className="font-medium text-sm sm:text-base line-clamp-2">
-                            {item.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">{formatCurrency(item.price)}</td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center">
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center">
+                            <img
+                              src={item.image || '/placeholder.svg?height=60&width=60'}
+                              alt={item.name}
+                              className="w-12 h-12 sm:w-16 sm:h-16 object-cover mr-2 sm:mr-3 rounded-md hover:cursor-pointer"
+                              onClick={() => navigate(`/product/${item.productId}`)}
+                            />
+                            <div>
+                              <span className="font-medium text-sm sm:text-base line-clamp-2">
+                                {item.name}
+                              </span>
+                              {!isInStock && (
+                                <Badge variant="destructive" className="mt-1">
+                                  Hết hàng
+                                </Badge>
+                              )}
+                              {item.stock > 0 && item.stock < item.quantity && (
+                                <div className="text-xs text-red-600 mt-1">
+                                  Chỉ còn {item.stock} {item.unit} trong kho
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">{formatCurrency(item.price)}</td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center">
+                            <button
+                              className="w-6 h-6 sm:w-8 sm:h-8 border border-gray-300 flex items-center justify-center rounded-l-md bg-gray-100"
+                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <input
+                              type="text"
+                              value={item.quantity}
+                              readOnly
+                              className="w-8 sm:w-10 h-6 sm:h-8 border-t border-b border-gray-300 text-center text-sm"
+                            />
+                            <button
+                              className="w-6 h-6 sm:w-8 sm:h-8 border border-gray-300 flex items-center justify-center rounded-r-md bg-gray-100"
+                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                              disabled={item.quantity >= item.stock}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">{formatCurrency(item.price * item.quantity)}</td>
+                        <td className="py-4 px-4">
                           <button
-                            className="w-6 h-6 sm:w-8 sm:h-8 border border-gray-300 flex items-center justify-center rounded-l-md bg-gray-100"
-                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() => removeItem(item.productId)}
                           >
-                            <Minus className="h-3 w-3" />
+                            Xóa
                           </button>
-                          <input
-                            type="text"
-                            value={item.quantity}
-                            readOnly
-                            className="w-8 sm:w-10 h-6 sm:h-8 border-t border-b border-gray-300 text-center text-sm"
-                          />
-                          <button
-                            className="w-6 h-6 sm:w-8 sm:h-8 border border-gray-300 flex items-center justify-center rounded-r-md bg-gray-100"
-                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">{formatCurrency(item.price * item.quantity)}</td>
-                      <td className="py-4 px-4">
-                        <button
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => removeItem(item.productId)}
-                        >
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

@@ -74,7 +74,9 @@ const useCartStore = create<CartState>()(
         // Check if adding this quantity would exceed stock
         if (totalQuantity > product.stock) {
           toast.error(
-            `Không thể thêm ${quantity} ${product.unit}. Giỏ hàng của bạn đã có ${existingQuantity} ${product.unit}.`
+            `Không thể thêm ${quantity} ${product.unit}. Chỉ còn ${
+              product.stock - existingQuantity
+            } ${product.unit} trong kho.`
           )
           return
         }
@@ -168,13 +170,26 @@ const useCartStore = create<CartState>()(
 
         set((state) => {
           // Update the quantity in both arrays
+          const newCartItems = state.cartItems.map((item) =>
+            item.productId === productId ? { ...item, quantity } : item
+          )
+
+          const newItems = state.items.map((item) =>
+            item.productId === productId ? { ...item, quantity } : item
+          )
+
+          // If this item is now out of stock, remove it from selected items
+          let newSelectedItemIds = [...state.selectedItemIds]
+          const updatedItem = newItems.find((item) => item.productId === productId)
+
+          if (updatedItem && updatedItem.stock < updatedItem.quantity) {
+            newSelectedItemIds = newSelectedItemIds.filter((id) => id !== productId)
+          }
+
           return {
-            cartItems: state.cartItems.map((item) =>
-              item.productId === productId ? { ...item, quantity } : item
-            ),
-            items: state.items.map((item) =>
-              item.productId === productId ? { ...item, quantity } : item
-            ),
+            cartItems: newCartItems,
+            items: newItems,
+            selectedItemIds: newSelectedItemIds,
           }
         })
       },
@@ -192,8 +207,15 @@ const useCartStore = create<CartState>()(
       },
 
       setSelectedItems: (productIds) => {
-        console.log('Setting selected items in store:', productIds)
-        set({ selectedItemIds: productIds })
+        // Filter out any out-of-stock items
+        const { items } = get()
+        const validProductIds = productIds.filter((id) => {
+          const item = items.find((item) => item.productId === id)
+          return item && item.stock >= item.quantity
+        })
+
+        console.log('Setting selected items in store:', validProductIds)
+        set({ selectedItemIds: validProductIds })
       },
 
       fetchCartItems: async () => {
@@ -235,7 +257,18 @@ const useCartStore = create<CartState>()(
             }
           })
 
-          set({ items: fullCartItems, isLoading: false })
+          // Update selected items to remove any out-of-stock items
+          const currentSelectedIds = get().selectedItemIds
+          const validSelectedIds = currentSelectedIds.filter((id) => {
+            const item = fullCartItems.find((item: CartItem) => item.productId === id)
+            return item && item.stock >= item.quantity
+          })
+
+          set({
+            items: fullCartItems,
+            isLoading: false,
+            selectedItemIds: validSelectedIds,
+          })
         } catch (error) {
           console.error('Failed to fetch cart items:', error)
           set({ error: 'Failed to load cart items. Please try again.', isLoading: false })
