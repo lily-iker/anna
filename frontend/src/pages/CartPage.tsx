@@ -218,9 +218,9 @@ export default function CartPage() {
     <div className="container mx-auto space-y-8 md:space-y-12 px-4 sm:px-4 md:px-8 lg:px-16 pb-8 pt-24">
       <h1 className="text-2xl font-bold text-green-600 text-center mb-6">GIỎ HÀNG</h1>
 
-      {hasOutOfStockItems && (
-        <Alert className="mb-4 bg-amber-50 border-amber-200">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
+      {/* {hasOutOfStockItems && (
+        <Alert className="mb-4 bg-amber-50 border-amber-200 justify-center items-center">
+          <AlertTriangle className="h-5 w-5 text-amber-600 pb-1" />
           <AlertDescription className="text-amber-800 flex justify-between items-center">
             <span>
               Một số sản phẩm trong giỏ hàng đã hết hàng hoặc không đủ số lượng. Vui lòng cập nhật
@@ -237,7 +237,7 @@ export default function CartPage() {
             </Button>
           </AlertDescription>
         </Alert>
-      )}
+      )} */}
 
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* Cart Items Table */}
@@ -252,6 +252,7 @@ export default function CartPage() {
                         checked={isAllSelected}
                         onCheckedChange={handleSelectAll}
                         disabled={getValidItems().length === 0}
+                        className="data-[state=checked]:bg-green-500 data-[state=checked]:text-white data-[state=checked]:border-none border-gray-300"
                       />
                     </th>
                     <th className="py-3 px-4 text-left">Sản phẩm</th>
@@ -284,6 +285,7 @@ export default function CartPage() {
                               checked={selectedItems.includes(item.productId)}
                               onCheckedChange={() => handleSelectItem(item.productId)}
                               disabled={!isInStock}
+                              className="data-[state=checked]:bg-green-500 data-[state=checked]:text-white data-[state=checked]:border-none border-gray-300"
                             />
                           </td>
                           <td className="py-4 px-4">
@@ -359,11 +361,14 @@ export default function CartPage() {
             <Button
               asChild
               variant="outline"
-              className="bg-green-600 text-white hover:bg-green-700"
+              className="bg-green-500 text-white hover:bg-green-600 hover:text-white"
             >
               <Link to="/">Quay về trang chủ</Link>
             </Button>
-            <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700">
+            <Button
+              variant="outline"
+              className="bg-green-500 text-white hover:bg-green-600 hover:text-white"
+            >
               <Link to="/search">Tiếp tục mua hàng</Link>
             </Button>
           </div>
