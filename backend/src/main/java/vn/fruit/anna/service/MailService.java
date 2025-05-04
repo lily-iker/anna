@@ -160,7 +160,7 @@ public class MailService {
             html.append("<div class='item'>")
                     .append("<div class='item-name'>").append(item.getProductName()).append("</div>")
                     .append("<div class='item-quantity'>").append(item.getQuantity()).append(" x</div>")
-                    .append("<div class='item-price'>").append(formatCurrency(item.getPrice())).append("</div>")
+                    .append("<div class='item-price'>").append(formatCurrency(item.getPrice() / item.getQuantity())).append("</div>")
                     .append("</div>");
         }
 

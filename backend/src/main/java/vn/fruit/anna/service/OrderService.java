@@ -57,7 +57,7 @@ public class OrderService {
         order.setOrderItems(orderItems);
 
         Double total = orderItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .mapToDouble(OrderItem::getPrice)
                 .sum();
         order.setTotalPrice(total);
 
