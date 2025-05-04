@@ -39,6 +39,7 @@ public class OrderService {
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
     private final ProductRepository productRepository;
+    private final ProductService productService;
     private final MailService mailService;
 
     @Transactional
@@ -62,6 +63,8 @@ public class OrderService {
 
         orderRepository.save(order);
         orderRepository.flush();
+
+        productService.updateStockBulk(orderItems);
 
         customerService.updateCustomerOrderStats(customer, order);
 

@@ -17,7 +17,9 @@ import vn.fruit.anna.dto.request.CreateProductRequest;
 import vn.fruit.anna.dto.request.ListProductsByIdsRequest;
 import vn.fruit.anna.dto.filter.ProductFilter;
 import vn.fruit.anna.dto.response.ProductResponse;
+import vn.fruit.anna.exception.ResourceNotFoundException;
 import vn.fruit.anna.model.Category;
+import vn.fruit.anna.model.OrderItem;
 import vn.fruit.anna.model.Product;
 import vn.fruit.anna.model.ProductImage;
 import vn.fruit.anna.repository.CategoryRepository;
@@ -301,5 +303,24 @@ public class ProductService {
                 .build();
     }
 
+    @Transactional
+    public void updateStockBulk(List<OrderItem> orderItems) {
+        for (OrderItem item : orderItems) {
+            updateStock(item.getProductId(), item.getQuantity());
+        }
+    }
+
+    public void updateStock(UUID productId, int quantityToReduce) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + productId));
+
+        int currentStock = Optional.ofNullable(product.getStock()).orElse(0);
+
+        if (currentStock < quantityToReduce) {
+            throw new IllegalArgumentException("Not enough stock for product: " + product.getName());
+        }
+
+        product.setStock(currentStock - quantityToReduce);
+    }
 
 }
