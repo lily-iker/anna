@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true })
     try {
       const res = await axios.get('/api/user/my-account', { withCredentials: true })
-      console.log(res.data.result)
+      // console.log(res.data.result)
       set({ authUser: res.data.result })
     } catch (error) {
       console.error(error)
@@ -43,7 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await axios.post('/api/auth/login', { email, password })
       await useAuthStore.getState().fetchAuthUser()
-      toast.success('Logged in successfully')
+      toast.success('Đăng nhập thành công')
     } catch (error: unknown) {
       console.log(error)
       toast.error('Wrong email or passsword. Please try again')
@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await axios.post('/api/auth/logout')
       set({ authUser: null })
-      toast.success('Logged out successfully')
+      toast.success('Đăng xuất thành công')
     } catch (error: unknown) {
       console.log(error)
       toast.error('Something went wrong')

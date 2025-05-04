@@ -102,7 +102,11 @@ export default function MainNavbar() {
             <div className="flex items-center justify-between h-16 px-4">
               {/* Logo */}
               <div className="flex items-center gap-2">
-                <Link to="/" className="flex items-center gap-2">
+                <Link
+                  to="/"
+                  className="flex items-center gap-2"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                >
                   <img
                     src="https://res.cloudinary.com/dschfkj54/image/upload/v1742753030/485713948_632125426372122_1685471156183650104_n_idq8lr.png"
                     alt="Anna Logo"
@@ -113,19 +117,32 @@ export default function MainNavbar() {
 
               {/* Desktop Nav */}
               <nav className="hidden md:flex items-center space-x-12 lg:mr-32">
-                <Link to="/" className="text-gray-700 hover:text-green-600 font-medium">
+                <Link
+                  to="/"
+                  className="text-gray-700 hover:text-green-600 font-medium"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                >
                   Trang chủ
                 </Link>
                 <Link
                   to="/search"
                   className="text-gray-700 hover:text-green-600 font-medium flex items-center"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 >
                   Danh mục
                 </Link>
-                <Link to="/blogs" className="text-gray-700 hover:text-green-600 font-medium">
+                <Link
+                  to="/blogs"
+                  className="text-gray-700 hover:text-green-600 font-medium"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                >
                   Blog
                 </Link>
-                <Link to="/contact" className="text-gray-700 hover:text-green-600 font-medium">
+                <Link
+                  to="/contact"
+                  className="text-gray-700 hover:text-green-600 font-medium"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                >
                   Liên hệ
                 </Link>
               </nav>
@@ -136,7 +153,10 @@ export default function MainNavbar() {
                   className="hover:cursor-pointer"
                   variant="ghost"
                   size="icon"
-                  onClick={() => navigate('/cart')}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    navigate('/cart')
+                  }}
                 >
                   <ShoppingCart className="h-5 w-5 text-gray-700" />
                 </Button>
@@ -193,28 +213,40 @@ export default function MainNavbar() {
             <Link
               to="/"
               className="flex items-center gap-3 text-gray-700 hover:text-green-600 font-medium"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                setSidebarOpen(false)
+              }}
             >
               <Home className="h-5 w-5" /> Trang chủ
             </Link>
             <Link
               to="/search"
               className="flex items-center gap-3 text-gray-700 hover:text-green-600 font-medium"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                setSidebarOpen(false)
+              }}
             >
               <LayoutGrid className="h-5 w-5" /> Danh mục
             </Link>
             <Link
               to="/blogs"
               className="flex items-center gap-3 text-gray-700 hover:text-green-600 font-medium"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                setSidebarOpen(false)
+              }}
             >
               <BookOpen className="h-5 w-5" /> Blog
             </Link>
             <Link
               to="/contact"
               className="flex items-center gap-3 text-gray-700 hover:text-green-600 font-medium"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                setSidebarOpen(false)
+              }}
             >
               <Phone className="h-5 w-5" /> Liên hệ
             </Link>
@@ -224,6 +256,7 @@ export default function MainNavbar() {
               onClick={() => {
                 navigate('/cart')
                 setSidebarOpen(false)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
               }}
             >
               <ShoppingCart className="h-5 w-5" />

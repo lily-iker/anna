@@ -16,6 +16,8 @@ import Feature from '@/components/home/feature'
 import { SectionDivider } from '@/components/ui/section-devider'
 import BlogCarousel from '@/components/home/blog-carousel'
 import useBlogStore from '@/stores/useBlogStore'
+import Loading from '@/components/loading'
+import NotFoundPage from './error/NotFoundPage'
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -174,12 +176,12 @@ export default function ProductDetailPage() {
     navigate('/checkout')
   }
 
-  if (isLoading || !currentProduct) {
-    return (
-      <div className="container mx-auto p-4 min-h-screen flex items-center justify-center">
-        <p className="text-lg">Đang tải sản phẩm...</p>
-      </div>
-    )
+  if (isLoading) {
+    return <Loading />
+  }
+
+  if (!currentProduct) {
+    return <NotFoundPage />
   }
 
   const discountPrice = Math.round(

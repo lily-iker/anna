@@ -1,12 +1,21 @@
 'use client'
 
+import { useAuthStore } from '@/stores/useAuthStore'
 import { Menu } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface AdminNavbarProps {
   onMenuClick: () => void
 }
 
 const AdminNavbar = ({ onMenuClick }: AdminNavbarProps) => {
+  const navigate = useNavigate()
+  const { logout } = useAuthStore()
+
+  const handleLogout = async () => {
+    navigate('/')
+    await logout()
+  }
   return (
     <header className="bg-white border-b p-4 flex justify-between items-center">
       {/* Menu button - only visible on mobile */}
@@ -35,9 +44,13 @@ const AdminNavbar = ({ onMenuClick }: AdminNavbarProps) => {
             />
           </svg>
         </button>
-        <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+        <button
+          onClick={handleLogout}
+          className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition"
+          title="Logout"
+        >
           <span>U</span>
-        </div>
+        </button>
       </div>
     </header>
   )

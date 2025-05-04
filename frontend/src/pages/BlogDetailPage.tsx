@@ -5,6 +5,7 @@ import { useParams, Link } from 'react-router-dom'
 import useBlogStore from '@/stores/useBlogStore'
 import NotFoundPage from './error/NotFoundPage'
 import ResponsiveImage from '@/components/home/responsive-image'
+import Loading from '@/components/loading'
 
 export function BlogDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -19,6 +20,10 @@ export function BlogDetailPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [location.pathname])
+
+  if (isLoading) {
+    return <Loading />
+  }
 
   if (!currentBlog) {
     return <NotFoundPage />
@@ -57,7 +62,9 @@ export function BlogDetailPage() {
             <span className="mr-2">←</span> Quay lại
           </Link>
         ) : (
-          <div></div>
+          <Link to={`/blogs`} className="flex items-center text-gray-600 hover:text-gray-900">
+            <span className="mr-2">←</span> Quay lại
+          </Link>
         )}
 
         {currentBlog.nextBlogId ? (

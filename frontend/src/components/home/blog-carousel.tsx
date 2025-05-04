@@ -12,14 +12,10 @@ interface BlogCarouselProps {
 
 // Create a memoized blog item component
 const BlogItem = memo(({ item }: { item: Blog }) => (
-  <Link to="#" className="group block">
+  <Link to={`/blog/${item.id}`} className="group block">
     <div className="relative rounded-lg overflow-hidden">
       <ResponsiveImage
-        src={
-          item.thumbnailImage ||
-          'https://res.cloudinary.com/dr4kiyshe/image/upload/v1738244776/dam_vinh_hung_kkvsgx.jpg' ||
-          '/placeholder.svg'
-        }
+        src={item.thumbnailImage || '/placeholder.svg'}
         alt={item.title}
         aspectRatio="4/3"
         className="w-full group-hover:scale-105 transition-transform duration-300"
