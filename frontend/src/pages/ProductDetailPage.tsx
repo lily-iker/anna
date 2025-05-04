@@ -345,13 +345,17 @@ export default function ProductDetailPage() {
             <Button
               className="flex-1 bg-green-600 hover:bg-green-700"
               onClick={() => addToCart(currentProduct)}
-              disabled={currentProduct.stock === 0}
+              disabled={
+                currentProduct.stock === 0 || currentProduct.stock < currentProduct.minUnitToOrder
+              }
             >
               Thêm vào giỏ hàng
             </Button>
             <Button
               className="flex-1 bg-orange-500 hover:bg-orange-600"
-              disabled={currentProduct.stock === 0}
+              disabled={
+                currentProduct.stock === 0 || currentProduct.stock < currentProduct.minUnitToOrder
+              }
               onClick={handleBuyNow}
             >
               MUA NGAY
@@ -379,7 +383,9 @@ export default function ProductDetailPage() {
 
           {/* Delivery Info */}
           <div className="bg-white p-6 border rounded-md w-full lg:w-[300px] xl:w-[360px] shrink-0 self-start">
-            <h3 className="font-medium text-lg mb-4">Dịch vụ giao hàng</h3>
+            <h3 className="text-center text-green-600 font-medium text-lg mb-4">
+              Dịch vụ giao hàng
+            </h3>
             <ul className="space-y-4">
               <li className="flex items-center gap-3">
                 <div className="size-8 rounded-full border border-gray-300 flex items-center justify-center">
@@ -393,7 +399,7 @@ export default function ProductDetailPage() {
                 </div>
                 <div>
                   <p>Giao hàng dự kiến:</p>
-                  <p className="font-medium">Thứ 2 - Chủ nhật từ 08:00 - 21h00</p>
+                  <p className="">Thứ 2 - Chủ nhật từ 08:00 - 21h00</p>
                 </div>
               </li>
               <li className="flex items-center gap-3">
@@ -402,7 +408,7 @@ export default function ProductDetailPage() {
                 </div>
                 <div>
                   <p>Hỗ trợ 24/7</p>
-                  <p>Với các kênh facebook, zalo</p>
+                  <p>Với các kênh Facebook, Zalo</p>
                 </div>
               </li>
             </ul>

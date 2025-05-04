@@ -207,7 +207,7 @@ const useCartStore = create<CartState>()(
       },
 
       setSelectedItems: (productIds) => {
-        // Filter out any out-of-stock items
+        // Filter out any items with insufficient stock
         const { items } = get()
         const validProductIds = productIds.filter((id) => {
           const item = items.find((item) => item.productId === id)
@@ -257,7 +257,7 @@ const useCartStore = create<CartState>()(
             }
           })
 
-          // Update selected items to remove any out-of-stock items
+          // Update selected items to remove any with insufficient stock
           const currentSelectedIds = get().selectedItemIds
           const validSelectedIds = currentSelectedIds.filter((id) => {
             const item = fullCartItems.find((item: CartItem) => item.productId === id)
@@ -285,7 +285,10 @@ const useCartStore = create<CartState>()(
 
       getSelectedItems: () => {
         const { items, selectedItemIds } = get()
-        return items.filter((item) => selectedItemIds.includes(item.productId))
+        // Filter items that are both selected AND have sufficient stock
+        return items.filter(
+          (item) => selectedItemIds.includes(item.productId) && item.stock >= item.quantity
+        )
       },
     }),
     {

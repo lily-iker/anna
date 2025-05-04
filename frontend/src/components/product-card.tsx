@@ -82,8 +82,9 @@ function ProductCard({ product }: ProductCardProps) {
             size="sm"
             className="w-full bg-[#9DE25C] hover:bg-[#8bc74e] text-black font-medium hover:cursor-pointer"
             onClick={handleBuyNow}
+            disabled={product.stock <= 0 || product.stock < product.minUnitToOrder}
           >
-            Mua ngay
+            {product.stock > 0 ? 'Mua ngay' : 'Hết hàng'}
           </Button>
         </CardFooter>
       </Card>
